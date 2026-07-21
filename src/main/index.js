@@ -9,15 +9,17 @@ const PORT = 3001;
 
 expressApp.use(express.json());
 
+// Serve Static Frontend
+expressApp.use(express.static(path.join(__dirname, '../frontend/views')));
+
 // Inisialisasi Database SQLite
 initDatabase();
 
-// API Route Status
+// API Endpoints
 expressApp.get('/api/status', (req, res) => {
   res.json({ status: 'Online', message: 'Backend Server SQLite3 Berjalan!' });
 });
 
-// API Route Report Warehouse
 expressApp.get('/api/report/warehouse', async (req, res) => {
   const { warehouse_id, start_date, end_date } = req.query;
   try {
@@ -28,22 +30,24 @@ expressApp.get('/api/report/warehouse', async (req, res) => {
   }
 });
 
-// Jalankan Express
+// Start Express Server
 expressApp.listen(PORT, () => {
-  console.log(`Express Backend running on http://localhost:${PORT}`);
+  console.log(`Express Server running on http://localhost:${PORT}`);
 });
 
 function createWindow() {
   const win = new BrowserWindow({
-    width: 1280,
-    height: 800,
+    width: 1366,
+    height: 768,
     title: "Egg Inventory System - Farm Management",
+    autoHideMenuBar: true, // Sembunyikan menu bar bawaan Electron
     webPreferences: {
       nodeIntegration: true
     }
   });
 
-  win.loadURL(`http://localhost:${PORT}/api/status`);
+  // Load Halaman UI Dashboard Utama
+  win.loadURL(`http://localhost:${PORT}/index.html`);
 }
 
 app.whenReady().then(createWindow);
