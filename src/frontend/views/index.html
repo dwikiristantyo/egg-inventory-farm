@@ -4,173 +4,510 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Egg Inventory Management System</title>
-  <!-- Tailwind CSS & Alpine.js -->
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-</head>
-<body class="bg-slate-50 font-sans antialiased" x-data="appData()">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
-  <div class="flex h-screen overflow-hidden">
-    <!-- SIDEBAR NAV (Softr Style Theme) -->
-    <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col flex-shrink-0">
-      <div class="p-5 border-b border-slate-800 flex items-center space-x-3">
-        <div class="bg-amber-500 text-white p-2 rounded-lg font-bold text-xl"><i class="fa-solid fa-egg"></i></div>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            softr: {
+              bg: '#F8FAFC', sidebar: '#0F172A', border: '#E2E8F0',
+              primary: '#2563EB', primaryHover: '#1D4ED8', textDark: '#1E293B', textMuted: '#64748B'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-softr-bg font-sans antialiased text-softr-textDark" x-data="appData()" x-init="initApp()">
+
+  <!-- 1. LOGIN SCREEN -->
+  <div x-show="!isLoggedIn" class="min-h-screen flex items-center justify-center bg-slate-900 p-4">
+    <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-100">
+      <div class="flex items-center space-x-3 mb-6">
+        <div class="bg-blue-600 text-white p-2.5 rounded-xl text-xl font-bold">
+          <i class="fa-solid fa-boxes-stacked"></i>
+        </div>
         <div>
-          <h1 class="font-bold text-white text-base leading-tight">Egg Inventory</h1>
-          <p class="text-xs text-slate-400">Farm Stock System</p>
+          <h2 class="text-xl font-bold text-slate-800">Egg Inventory System</h2>
+          <p class="text-xs text-slate-500">Silakan login untuk melanjutkan</p>
         </div>
       </div>
 
-      <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
-        <div class="text-xs font-semibold text-slate-500 px-3 uppercase tracking-wider mb-2">Menu Utama</div>
+      <template x-if="loginError">
+        <div class="mb-4 bg-rose-50 text-rose-600 border border-rose-200 p-3 rounded-lg text-xs" x-text="loginError"></div>
+      </template>
+
+      <form @submit.prevent="handleLogin()" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Username</label>
+          <input type="text" x-model="loginForm.username" placeholder="admin" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs focus:outline-none focus:border-blue-600" required>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Password</label>
+          <input type="password" x-model="loginForm.password" placeholder="••••••••" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs focus:outline-none focus:border-blue-600" required>
+        </div>
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold py-2.5 rounded-lg transition">Login Sistem</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. MAIN DASHBOARD APP -->
+  <div x-show="isLoggedIn" class="flex h-screen overflow-hidden">
+    <!-- SIDEBAR NAV -->
+    <aside class="w-64 bg-softr-sidebar text-slate-300 flex flex-col flex-shrink-0 border-r border-slate-800">
+      <div class="p-5 border-b border-slate-800/80 flex items-center space-x-3">
+        <div class="bg-softr-primary text-white p-2 rounded-lg font-bold text-lg w-9 h-9 flex items-center justify-center">
+          <i class="fa-solid fa-boxes-stacked text-base"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-white text-sm tracking-tight leading-none">Egg Inventory</h1>
+          <p class="text-[11px] text-slate-400 mt-1">Farm Management</p>
+        </div>
+      </div>
+
+      <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
+        <div class="text-[10px] font-bold text-slate-500 px-3 uppercase tracking-wider mb-2 mt-2">Menu Utama</div>
         
-        <!-- Transaksi Submenu -->
-        <a href="#" @click="currentTab = 'transaksi'" :class="currentTab === 'transaksi' ? 'bg-amber-500 text-white' : 'hover:bg-slate-800'" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition">
-          <i class="fa-solid fa-right-left"></i><span>Transaksi Stock</span>
+        <a href="#" @click="currentTab = 'transaksi'; fetchTransactions();" :class="currentTab === 'transaksi' ? 'bg-softr-primary text-white font-semibold' : 'text-slate-400 hover:bg-slate-800/60 hover:text-white'" class="flex items-center space-x-3 px-3 py-2 rounded-md text-xs transition-all">
+          <i class="fa-solid fa-right-left text-sm w-4"></i><span>Transaksi Stock</span>
         </a>
 
-        <!-- Report Submenu -->
-        <a href="#" @click="currentTab = 'report'" :class="currentTab === 'report' ? 'bg-amber-500 text-white' : 'hover:bg-slate-800'" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition">
-          <i class="fa-solid fa-chart-pie"></i><span>Report Stock</span>
+        <a href="#" @click="currentTab = 'reports'; fetchStockReport();" :class="currentTab === 'reports' ? 'bg-softr-primary text-white font-semibold' : 'text-slate-400 hover:bg-slate-800/60 hover:text-white'" class="flex items-center space-x-3 px-3 py-2 rounded-md text-xs transition-all">
+          <i class="fa-solid fa-chart-pie text-sm w-4"></i><span>Laporan Stok</span>
         </a>
 
-        <!-- Master Data -->
-        <div class="pt-4 text-xs font-semibold text-slate-500 px-3 uppercase tracking-wider mb-2">Master Data</div>
-        <a href="#" @click="currentTab = 'master_item'" :class="currentTab === 'master_item' ? 'bg-amber-500 text-white' : 'hover:bg-slate-800'" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition">
-          <i class="fa-solid fa-box-archive"></i><span>Master Item</span>
-        </a>
-        <a href="#" @click="currentTab = 'master_farm'" :class="currentTab === 'master_farm' ? 'bg-amber-500 text-white' : 'hover:bg-slate-800'" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition">
-          <i class="fa-solid fa-warehouse"></i><span>Master Farm</span>
+        <a href="#" @click="currentTab = 'period_lock'; fetchPeriods();" :class="currentTab === 'period_lock' ? 'bg-softr-primary text-white font-semibold' : 'text-slate-400 hover:bg-slate-800/60 hover:text-white'" class="flex items-center space-x-3 px-3 py-2 rounded-md text-xs transition-all">
+          <i class="fa-solid fa-lock text-sm w-4"></i><span>Lock Periode</span>
         </a>
 
-        <!-- Administrator -->
-        <div class="pt-4 text-xs font-semibold text-slate-500 px-3 uppercase tracking-wider mb-2">Administrator</div>
-        <a href="#" @click="currentTab = 'admin_user'" :class="currentTab === 'admin_user' ? 'bg-amber-500 text-white' : 'hover:bg-slate-800'" class="flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition">
-          <i class="fa-solid fa-users-gear"></i><span>User & Access</span>
+        <div class="pt-4 text-[10px] font-bold text-slate-500 px-3 uppercase tracking-wider mb-2">Master Data</div>
+
+        <a href="#" @click="currentTab = 'master_item'; fetchItems();" :class="currentTab === 'master_item' ? 'bg-softr-primary text-white font-semibold' : 'text-slate-400 hover:bg-slate-800/60 hover:text-white'" class="flex items-center space-x-3 px-3 py-2 rounded-md text-xs transition-all">
+          <i class="fa-solid fa-egg text-sm w-4"></i><span>Master Item</span>
+        </a>
+
+        <a href="#" @click="currentTab = 'master_farm'; fetchWarehouses();" :class="currentTab === 'master_farm' ? 'bg-softr-primary text-white font-semibold' : 'text-slate-400 hover:bg-slate-800/60 hover:text-white'" class="flex items-center space-x-3 px-3 py-2 rounded-md text-xs transition-all">
+          <i class="fa-solid fa-warehouse text-sm w-4"></i><span>Master Farm / WH</span>
+        </a>
+
+        <div class="pt-4 text-[10px] font-bold text-slate-500 px-3 uppercase tracking-wider mb-2">Administrator</div>
+        
+        <a href="#" @click="currentTab = 'user_group'; fetchUserGroups();" :class="currentTab === 'user_group' ? 'bg-softr-primary text-white font-semibold' : 'text-slate-400 hover:bg-slate-800/60 hover:text-white'" class="flex items-center space-x-3 px-3 py-2 rounded-md text-xs transition-all">
+          <i class="fa-solid fa-users-gear text-sm w-4"></i><span>User Group / Role</span>
+        </a>
+
+        <a href="#" @click="currentTab = 'admin_user'; fetchUsers();" :class="currentTab === 'admin_user' ? 'bg-softr-primary text-white font-semibold' : 'text-slate-400 hover:bg-slate-800/60 hover:text-white'" class="flex items-center space-x-3 px-3 py-2 rounded-md text-xs transition-all">
+          <i class="fa-solid fa-user-gear text-sm w-4"></i><span>User Management</span>
         </a>
       </nav>
 
-      <div class="p-4 border-t border-slate-800 flex items-center justify-between">
-        <div class="text-xs">
-          <p class="font-bold text-white">Admin Warehouse</p>
-          <span class="inline-flex items-center text-emerald-400"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5"></span>Offline Mode</span>
+      <div class="p-3 border-t border-slate-800/80 bg-slate-950/40 flex items-center justify-between">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold" x-text="currentUser.name ? currentUser.name.substring(0,2).toUpperCase() : 'AD'"></div>
+          <div class="text-xs">
+            <p class="font-medium text-white leading-tight" x-text="currentUser.name"></p>
+            <span class="text-[10px] text-emerald-400 font-medium" x-text="currentUser.role"></span>
+          </div>
         </div>
-        <i class="fa-solid fa-right-from-bracket text-slate-500 hover:text-white cursor-pointer"></i>
+        <button @click="isLoggedIn = false" class="text-slate-400 hover:text-white p-1.5 rounded transition" title="Logout"><i class="fa-solid fa-arrow-right-from-bracket text-xs"></i></button>
       </div>
     </aside>
 
     <!-- MAIN CONTENT AREA -->
-    <main class="flex-1 flex flex-col overflow-y-auto">
-      <!-- HEADER BAR -->
-      <header class="bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between sticky top-0 z-10">
+    <main class="flex-1 flex flex-col overflow-y-auto bg-softr-bg">
+      <header class="bg-white border-b border-softr-border px-8 py-4 flex items-center justify-between sticky top-0 z-10">
         <div>
-          <h2 class="text-xl font-bold text-slate-800" x-text="titleMap[currentTab]"></h2>
-          <p class="text-xs text-slate-500">Pencatatan dan Manajemen Stock Telur Real-time</p>
-        </div>
-        <div class="flex items-center space-x-3">
-          <span class="text-sm text-slate-600">Active Farm:</span>
-          <select class="bg-slate-100 border border-slate-300 text-slate-700 text-sm rounded-lg p-2 font-medium focus:ring-amber-500">
-            <option>Farm Utama - Kandang A</option>
-            <option>Farm Utama - Kandang B</option>
-          </select>
+          <h2 class="text-lg font-bold text-softr-textDark" x-text="titleMap[currentTab]"></h2>
+          <p class="text-xs text-softr-textMuted">Egg Inventory Management System</p>
         </div>
       </header>
 
-      <!-- CONTENT BODY -->
-      <div class="p-8">
-        <!-- TAB 1: TRANSAKSI -->
+      <div class="p-8 max-w-7xl w-full mx-auto">
+        
+        <!-- TAB 1: TRANSAKSI STOCK -->
         <template x-if="currentTab === 'transaksi'">
-          <div class="space-y-6">
-            <!-- Filter & Action Bar -->
-            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-4">
-              <div class="flex items-center space-x-3 flex-1">
-                <input type="date" class="border border-slate-300 rounded-lg p-2 text-sm">
-                <span class="text-slate-400">s/d</span>
-                <input type="date" class="border border-slate-300 rounded-lg p-2 text-sm">
-                <input type="text" placeholder="Cari item / No Transaksi..." class="border border-slate-300 rounded-lg p-2 text-sm w-64">
+          <div class="space-y-4">
+            <div class="bg-white p-4 rounded-xl border border-softr-border">
+              <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+                <div>
+                  <h3 class="text-sm font-bold text-slate-800">Daftar Transaksi Stok</h3>
+                  <p class="text-xs text-slate-500">Kelola alur telur masuk, keluar, dan penyesuaian (Adjustment)</p>
+                </div>
+                <button @click="openTransModal('create')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3.5 py-2 rounded-lg font-medium flex items-center space-x-1 transition">
+                  <i class="fa-solid fa-plus"></i><span>Tambah Transaksi</span>
+                </button>
               </div>
-              <button @click="showModalTrans = true" class="bg-amber-500 hover:bg-amber-600 text-white font-medium text-sm px-4 py-2.5 rounded-lg flex items-center space-x-2 transition shadow-sm">
-                <i class="fa-solid fa-plus"></i><span>Transaksi Baru</span>
-              </button>
+
+              <div class="mt-4 grid gap-3 xl:grid-cols-5">
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-500 mb-1">From Date</label>
+                  <input type="date" x-model="transFilter.from_date" class="w-full bg-slate-50 border border-softr-border rounded-lg p-2 text-xs">
+                </div>
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-500 mb-1">To Date</label>
+                  <input type="date" x-model="transFilter.to_date" class="w-full bg-slate-50 border border-softr-border rounded-lg p-2 text-xs">
+                </div>
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-500 mb-1">Farm / Warehouse</label>
+                  <select x-model="transFilter.warehouse_id" class="w-full bg-slate-50 border border-softr-border rounded-lg p-2 text-xs">
+                    <option value="">Semua Warehouse</option>
+                    <template x-for="wh in warehouses" :key="wh.id">
+                      <option :value="wh.id" x-text="wh.warehouse_name"></option>
+                    </template>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-[11px] font-semibold text-slate-500 mb-1">Cari Item</label>
+                  <input type="text" x-model="transFilter.search" placeholder="Kode atau nama item" class="w-full bg-slate-50 border border-softr-border rounded-lg p-2 text-xs">
+                </div>
+                <button @click="fetchTransactions()" class="bg-slate-800 text-white text-xs py-2 rounded-lg font-semibold">Retrieve</button>
+              </div>
             </div>
 
-            <!-- Tabel Transaksi (Top 30 Baris) -->
-            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="bg-white rounded-xl border border-softr-border shadow-xs overflow-hidden">
               <table class="w-full text-left border-collapse">
-                <thead class="bg-slate-50 border-b border-slate-200 text-xs font-semibold text-slate-500 uppercase">
+                <thead class="bg-slate-50/80 border-b border-softr-border text-[11px] font-semibold text-softr-textMuted uppercase tracking-wider">
                   <tr>
-                    <th class="p-4">No Transaksi</th>
-                    <th class="p-4">Tanggal</th>
-                    <th class="p-4">Tipe Transaksi</th>
-                    <th class="p-4">Farm/Warehouse</th>
-                    <th class="p-4">Status</th>
-                    <th class="p-4 text-center">Aksi</th>
+                    <th class="py-3 px-4">No. Transaksi</th>
+                    <th class="py-3 px-4">Tanggal</th>
+                    <th class="py-3 px-4">Tipe</th>
+                    <th class="py-3 px-4">Farm / Warehouse</th>
+                    <th class="py-3 px-4">Status</th>
+                    <th class="py-3 px-4 text-center">Aksi</th>
                   </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100 text-sm">
-                  <tr class="hover:bg-slate-50">
-                    <td class="p-4 font-mono text-amber-600 font-medium">TR-202607-0001</td>
-                    <td class="p-4 text-slate-600">21 Jul 2026</td>
-                    <td class="p-4"><span class="bg-emerald-100 text-emerald-700 font-semibold px-2.5 py-1 rounded-full text-xs">Barang Masuk</span></td>
-                    <td class="p-4 text-slate-600">Farm Utama - Kandang A</td>
-                    <td class="p-4"><span class="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full text-xs font-medium">Aktif</span></td>
-                    <td class="p-4 text-center space-x-2">
-                      <button class="text-blue-600 hover:text-blue-800 font-medium"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-                      <button class="text-rose-600 hover:text-rose-800 font-medium"><i class="fa-solid fa-trash"></i> Hapus</button>
-                    </td>
-                  </tr>
+                <tbody class="divide-y divide-softr-border text-xs text-softr-textDark">
+                  <template x-for="item in transactions" :key="item.id">
+                    <tr class="hover:bg-slate-50/60 transition">
+                      <td class="py-3 px-4 font-mono font-medium text-softr-primary" x-text="item.trans_number"></td>
+                      <td class="py-3 px-4 text-softr-textMuted" x-text="item.trans_date"></td>
+                      <td class="py-3 px-4">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium"
+                          :class="{
+                            'bg-emerald-50 text-emerald-700 border border-emerald-200': item.trans_type === 'IN',
+                            'bg-rose-50 text-rose-700 border border-rose-200': item.trans_type === 'OUT',
+                            'bg-amber-50 text-amber-700 border border-amber-200': item.trans_type === 'ADJ'
+                          }"
+                          x-text="item.trans_type">
+                        </span>
+                      </td>
+                      <td class="py-3 px-4 text-softr-textMuted" x-text="item.warehouse_name || 'Serang Farm Layer'"></td>
+                      <td class="py-3 px-4">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                          :class="{
+                            'bg-emerald-100 text-emerald-700': item.status === 'Active',
+                            'bg-slate-100 text-slate-600': item.status === 'Posted',
+                            'bg-rose-100 text-rose-700': item.status === 'Deleted'
+                          }"
+                          x-text="item.status">
+                        </span>
+                      </td>
+                      <td class="py-3 px-4 text-center space-x-1">
+                        <button @click="viewTransDetail(item.id)" class="px-2 py-1 text-blue-600 hover:bg-blue-50 rounded font-medium"><i class="fa-solid fa-eye"></i> Detail</button>
+                        <button x-show="item.status === 'Active'" @click="openTransModal(item)" class="px-2 py-1 text-amber-600 hover:bg-amber-50 rounded font-medium"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
+                        <button x-show="item.status === 'Active'" @click="deleteTransaction(item.id)" class="px-2 py-1 text-rose-600 hover:bg-rose-50 rounded font-medium"><i class="fa-solid fa-trash"></i> Hapus</button>
+                      </td>
+                    </tr>
+                  </template>
                 </tbody>
               </table>
             </div>
           </div>
         </template>
 
-        <!-- TAB 2: REPORT STOCK -->
-        <template x-if="currentTab === 'report'">
+        <!-- TAB 2: REPORTS -->
+        <template x-if="currentTab === 'reports'">
+          <div class="space-y-4">
+            <div class="bg-white p-4 rounded-xl border border-softr-border">
+              <h3 class="text-sm font-bold text-slate-800 mb-2">Laporan Ringkasan Stok Telur</h3>
+              <p class="text-xs text-slate-500">Pilih lokasi Farm untuk melihat posisi stok real-time</p>
+            </div>
+            <div class="bg-white rounded-xl border border-softr-border overflow-hidden">
+              <table class="w-full text-left border-collapse">
+                <thead class="bg-slate-50 border-b text-[11px] font-semibold text-slate-500 uppercase">
+                  <tr>
+                    <th class="py-3 px-4">Kode Item</th>
+                    <th class="py-3 px-4">Nama Telur / Item</th>
+                    <th class="py-3 px-4">Total Stok (Butir / Pcs)</th>
+                    <th class="py-3 px-4">Total Berat (Kg)</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y text-xs">
+                  <template x-for="r in stockReport" :key="r.item_code">
+                    <tr>
+                      <td class="py-3 px-4 font-mono text-blue-600" x-text="r.item_code"></td>
+                      <td class="py-3 px-4 font-medium" x-text="r.item_name"></td>
+                      <td class="py-3 px-4 font-bold text-slate-800" x-text="r.total_pcs || 0"></td>
+                      <td class="py-3 px-4 font-bold text-emerald-600" x-text="(r.total_weight || 0).toFixed(2)"></td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </template>
+
+        <!-- TAB 3: MASTER ITEM -->
+        <template x-if="currentTab === 'master_item'">
+          <div class="space-y-4">
+            <div class="flex justify-between items-center bg-white p-4 rounded-xl border border-softr-border">
+              <h3 class="text-sm font-bold">Master Katalog Item</h3>
+              <button @click="showItemModal = true" class="bg-blue-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Tambah Item</button>
+            </div>
+            <div class="bg-white rounded-xl border border-softr-border overflow-hidden">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead class="bg-slate-50 uppercase text-slate-500">
+                  <tr>
+                    <th class="p-3">Kode</th>
+                    <th class="p-3">Nama Item</th>
+                    <th class="p-3">Kategori</th>
+                    <th class="p-3">Satuan Sekunder</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y">
+                  <template x-for="i in itemsList" :key="i.id">
+                    <tr>
+                      <td class="p-3 font-mono" x-text="i.item_code"></td>
+                      <td class="p-3 font-medium" x-text="i.item_name"></td>
+                      <td class="p-3" x-text="i.category"></td>
+                      <td class="p-3" x-text="i.secondary_unit"></td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </template>
+
+        <!-- TAB 4: USER GROUP / ROLE PERMISSION -->
+        <template x-if="currentTab === 'user_group'">
+          <div class="space-y-4">
+            <div class="flex justify-between items-center bg-white p-4 rounded-xl border border-softr-border">
+              <h3 class="text-sm font-bold">Setup User Group & Role</h3>
+            </div>
+            <div class="bg-white rounded-xl border border-softr-border overflow-hidden p-4">
+              <table class="w-full text-left text-xs divide-y">
+                <thead>
+                  <tr class="uppercase text-slate-500">
+                    <th class="p-2">Group Name</th>
+                    <th class="p-2">Deskripsi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template x-for="g in userGroups" :key="g.id">
+                    <tr>
+                      <td class="p-2 font-bold" x-text="g.group_name"></td>
+                      <td class="p-2" x-text="g.description"></td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </template>
+
+        <!-- TAB 5: LOCK PERIODE -->
+        <template x-if="currentTab === 'period_lock'">
           <div class="space-y-6">
-            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-              <h3 class="font-bold text-slate-800 mb-4">Parameter Report</h3>
-              <div class="grid grid-cols-4 gap-4">
-                <div>
-                  <label class="text-xs font-semibold text-slate-600">Warehouse</label>
-                  <select class="w-full border border-slate-300 rounded-lg p-2 text-sm mt-1">
-                    <option>Farm Utama - Kandang A</option>
+            <div class="bg-white p-5 rounded-xl border border-softr-border shadow-xs">
+              <h3 class="text-sm font-bold text-softr-textDark mb-3">Eksekusi Lock / Unlock Periode</h3>
+              <div class="flex items-end space-x-3 max-w-lg">
+                <div class="flex-1">
+                  <label class="block text-[11px] font-semibold text-softr-textMuted mb-1">Bulan</label>
+                  <select x-model="lockForm.month" class="w-full bg-slate-50 border border-softr-border rounded-lg p-2 text-xs">
+                    <option value="5">Mei (05)</option>
+                    <option value="6">Juni (06)</option>
+                    <option value="7">Juli (07)</option>
                   </select>
                 </div>
-                <div>
-                  <label class="text-xs font-semibold text-slate-600">Tgl Awal</label>
-                  <input type="date" class="w-full border border-slate-300 rounded-lg p-2 text-sm mt-1">
+                <div class="flex-1">
+                  <label class="block text-[11px] font-semibold text-softr-textMuted mb-1">Tahun</label>
+                  <select x-model="lockForm.year" class="w-full bg-slate-50 border border-softr-border rounded-lg p-2 text-xs">
+                    <option value="2026">2026</option>
+                  </select>
                 </div>
-                <div>
-                  <label class="text-xs font-semibold text-slate-600">Tgl Akhir</label>
-                  <input type="date" class="w-full border border-slate-300 rounded-lg p-2 text-sm mt-1">
-                </div>
-                <div class="flex items-end space-x-2">
-                  <button class="bg-slate-900 hover:bg-slate-800 text-white text-sm px-4 py-2.5 rounded-lg flex-1 font-medium">Generate</button>
-                  <button class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm px-3 py-2.5 rounded-lg" title="Export Excel"><i class="fa-solid fa-file-excel"></i></button>
-                  <button class="bg-rose-600 hover:bg-rose-700 text-white text-sm px-3 py-2.5 rounded-lg" title="Print PDF"><i class="fa-solid fa-print"></i></button>
-                </div>
+                <button @click="toggleLockPeriod('LOCK')" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition"><i class="fa-solid fa-lock mr-1"></i> Lock</button>
+                <button @click="toggleLockPeriod('UNLOCK')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition"><i class="fa-solid fa-lock-open mr-1"></i> Unlock</button>
               </div>
             </div>
           </div>
         </template>
+
       </div>
     </main>
   </div>
 
-  <!-- JS APP DATA -->
+  <!-- MODAL TRANSAKSI HEADER + DETAIL -->
+  <div x-show="showTransModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-xl border border-softr-border max-w-2xl w-full p-6 shadow-xl space-y-4">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="font-bold text-sm text-slate-800">Form Transaksi Stok + Detail Item</h3>
+        <button @click="showTransModal = false" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <form @submit.prevent="saveTransactionWithDetails()" class="space-y-4">
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-semibold mb-1">Tanggal</label>
+            <input type="date" x-model="transForm.trans_date" class="w-full bg-slate-50 border p-2 text-xs rounded-lg" required>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold mb-1">Tipe</label>
+            <select x-model="transForm.trans_type" class="w-full bg-slate-50 border p-2 text-xs rounded-lg">
+              <option value="IN">Barang Masuk (IN)</option>
+              <option value="OUT">Barang Keluar (OUT)</option>
+              <option value="ADJ">Adjustment (ADJ)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold mb-1">Farm / Warehouse</label>
+            <select x-model="transForm.warehouse_id" class="w-full bg-slate-50 border p-2 text-xs rounded-lg">
+              <template x-for="wh in warehouses" :key="wh.id">
+                <option :value="wh.id" x-text="wh.warehouse_name"></option>
+              </template>
+            </select>
+          </div>
+        </div>
+
+        <div class="border-t pt-3">
+          <div class="flex justify-between items-center mb-2">
+            <h4 class="text-xs font-bold text-slate-700">Detail Item Transaksi</h4>
+            <button type="button" @click="addDetailRow()" class="text-[11px] bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded font-semibold text-blue-600">+ Tambah Baris</button>
+          </div>
+          
+          <div class="space-y-2 max-h-48 overflow-y-auto">
+            <template x-for="(d, idx) in transForm.details" :key="idx">
+              <div class="flex items-center space-x-2 bg-slate-50 p-2 rounded-lg text-xs">
+                <select x-model="d.item_id" class="flex-1 bg-white border p-1.5 rounded">
+                  <template x-for="itm in itemsList" :key="itm.id">
+                    <option :value="itm.id" x-text="itm.item_name"></option>
+                  </template>
+                </select>
+                <input type="number" x-model="d.qty_pcs" placeholder="Pcs" class="w-20 bg-white border p-1.5 rounded">
+                <input type="number" step="0.01" x-model="d.qty_weight" placeholder="Kg" class="w-20 bg-white border p-1.5 rounded">
+                <button type="button" @click="transForm.details.splice(idx, 1)" class="text-rose-600 p-1"><i class="fa-solid fa-trash"></i></button>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <div class="pt-2 flex space-x-2">
+          <button type="button" @click="showTransModal = false" class="flex-1 bg-slate-100 py-2 rounded-lg text-xs font-semibold">Batal</button>
+          <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-lg text-xs font-semibold">Simpan Transaksi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
     function appData() {
       return {
+        isLoggedIn: false,
+        currentUser: {},
         currentTab: 'transaksi',
-        showModalTrans: false,
+        showTransModal: false,
+        loginForm: { username: '', password: '' },
+        transForm: { trans_date: '', trans_type: 'IN', warehouse_id: 1, details: [] },
+        transactions: [],
+        periods: [],
+        itemsList: [],
+        warehouses: [],
+        userGroups: [],
+        stockReport: [],
+        lockForm: { month: '5', year: '2026' },
         titleMap: {
-          'transaksi': 'Pencatatan Transaksi Stock',
-          'report': 'Laporan Mutasi & Saldo Stock',
-          'master_item': 'Master Item Barang',
-          'master_farm': 'Master Warehouse & Farm',
-          'admin_user': 'Pengaturan User & Hak Akses'
+          'transaksi': 'Transaksi Stock',
+          'reports': 'Laporan Ringkasan Stok',
+          'master_item': 'Master Katalog Item Telur',
+          'master_farm': 'Master Farm & Warehouse',
+          'user_group': 'User Group & Permissions',
+          'period_lock': 'Penguncian Periode'
+        },
+
+        initApp() {
+          if(this.isLoggedIn) {
+            this.fetchTransactions();
+            this.fetchWarehouses();
+            this.fetchItems();
+          }
+        },
+
+        async handleLogin() {
+          const res = await fetch('/api/login', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(this.loginForm) });
+          const data = await res.json();
+          if(data.success) {
+            this.isLoggedIn = true;
+            this.currentUser = data.user;
+            this.fetchTransactions();
+            this.fetchWarehouses();
+            this.fetchItems();
+          }
+        },
+
+        async fetchTransactions() {
+          const res = await fetch('/api/transactions');
+          const data = await res.json();
+          if (data.success) this.transactions = data.data;
+        },
+
+        async fetchItems() {
+          const res = await fetch('/api/items');
+          const data = await res.json();
+          if (data.success) this.itemsList = data.data;
+        },
+
+        async fetchWarehouses() {
+          const res = await fetch('/api/warehouses');
+          const data = await res.json();
+          if (data.success) this.warehouses = data.data;
+        },
+
+        async fetchUserGroups() {
+          const res = await fetch('/api/user-groups');
+          const data = await res.json();
+          if (data.success) this.userGroups = data.data;
+        },
+
+        async fetchStockReport() {
+          const res = await fetch('/api/reports/stock-summary');
+          const data = await res.json();
+          if (data.success) this.stockReport = data.data;
+        },
+
+        openTransModal() {
+          this.transForm.trans_date = new Date().toISOString().split('T')[0];
+          this.transForm.details = [{ item_id: this.itemsList[0]?.id || 1, qty_pcs: 100, qty_weight: 6.2 }];
+          this.showTransModal = true;
+        },
+
+        addDetailRow() {
+          this.transForm.details.push({ item_id: this.itemsList[0]?.id || 1, qty_pcs: 0, qty_weight: 0 });
+        },
+
+        async saveTransactionWithDetails() {
+          const res = await fetch('/api/transactions-with-details', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...this.transForm, created_by: this.currentUser.name })
+          });
+          const data = await res.json();
+          if (data.success) {
+            this.showTransModal = false;
+            this.fetchTransactions();
+          } else {
+            alert(data.message);
+          }
         }
       }
     }
