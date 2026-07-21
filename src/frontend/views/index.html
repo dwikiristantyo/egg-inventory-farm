@@ -4,15 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Egg Inventory Management System</title>
-  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-
   <script>
     tailwind.config = {
       theme: {
@@ -30,24 +27,18 @@
   </script>
 </head>
 <body class="bg-softr-bg font-sans antialiased text-softr-textDark" x-data="appData()" x-init="initApp()">
-
-  <!-- 1. LOGIN SCREEN -->
   <div x-show="!isLoggedIn" class="min-h-screen flex items-center justify-center bg-slate-900 p-4">
     <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-100">
       <div class="flex items-center space-x-3 mb-6">
-        <div class="bg-blue-600 text-white p-2.5 rounded-xl text-xl font-bold">
-          <i class="fa-solid fa-boxes-stacked"></i>
-        </div>
+        <div class="bg-blue-600 text-white p-2.5 rounded-xl text-xl font-bold"><i class="fa-solid fa-boxes-stacked"></i></div>
         <div>
           <h2 class="text-xl font-bold text-slate-800">Egg Inventory System</h2>
           <p class="text-xs text-slate-500">Silakan login untuk melanjutkan</p>
         </div>
       </div>
-
       <template x-if="loginError">
         <div class="mb-4 bg-rose-50 text-rose-600 border border-rose-200 p-3 rounded-lg text-xs" x-text="loginError"></div>
       </template>
-
       <form @submit.prevent="handleLogin()" class="space-y-4">
         <div>
           <label class="block text-xs font-semibold text-slate-600 mb-1">Username</label>
@@ -62,56 +53,27 @@
     </div>
   </div>
 
-  <!-- 2. MAIN DASHBOARD APP -->
   <div x-show="isLoggedIn" class="flex h-screen overflow-hidden">
-    <!-- SIDEBAR NAV -->
     <aside class="w-64 bg-softr-sidebar text-slate-300 flex flex-col flex-shrink-0 border-r border-slate-800">
       <div class="p-5 border-b border-slate-800/80 flex items-center space-x-3">
-        <div class="bg-softr-primary text-white p-2 rounded-lg font-bold text-lg w-9 h-9 flex items-center justify-center">
-          <i class="fa-solid fa-boxes-stacked text-base"></i>
-        </div>
+        <div class="bg-softr-primary text-white p-2 rounded-lg font-bold text-lg w-9 h-9 flex items-center justify-center"><i class="fa-solid fa-boxes-stacked text-base"></i></div>
         <div>
           <h1 class="font-bold text-white text-sm tracking-tight leading-none">Egg Inventory</h1>
           <p class="text-[11px] text-slate-400 mt-1">Farm Management</p>
         </div>
       </div>
-
       <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
         <div class="text-[10px] font-bold text-slate-500 px-3 uppercase tracking-wider mb-2 mt-2">Menu Utama</div>
-        
-        <a href="#" @click="currentTab = 'transaksi'; fetchTransactions();" :class="currentTab === 'transaksi' ? 'bg-softr-primary text-white font-semibold' : 'text-slate-400 hover:bg-slate-800/60 hover:text-white'" class="flex items-center space-x-3 px-3 py-2 rounded-md text-xs transition-all">
-          <i class="fa-solid fa-right-left text-sm w-4"></i><span>Transaksi Stock</span>
-        </a>
-
-        <a href="#" @click="currentTab = 'reports'; fetchStockReport();" :class="currentTab === 'reports' ? 'bg-softr-primary text-white font-semibold' : 'text-slate-400 hover:bg-slate-800/60 hover:text-white'" class="flex items-center space-x-3 px-3 py-2 rounded-md text-xs transition-all">
-          <i class="fa-solid fa-chart-pie text-sm w-4"></i><span>Laporan Stok</span>
-        </a>
-
-        <a href="#" @click="currentTab = 'period_lock'; fetchPeriods();" :class="currentTab === 'period_lock' ? 'bg-softr-primary text-white font-semibold' : 'text-slate-400 hover:bg-slate-800/60 hover:text-white'" class="flex items-center space-x-3 px-3 py-2 rounded-md text-xs transition-all">
-          <i class="fa-solid fa-lock text-sm w-4"></i><span>Lock Periode</span>
-        </a>
-
+        <a href="#" @click="currentTab = 'transaksi'; fetchTransactions();" :class="currentTab === 'transaksi' ? 'bg-softr-primary text-white font-semibold' : 'text-slate-400 hover:bg-slate-800/60 hover:text-white'" class="flex items-center space-x-3 px-3 py-2 rounded-md text-xs transition-all"><i class="fa-solid fa-right-left text-sm w-4"></i><span>Transaksi Stock</span></a>
+        <a href="#" @click="currentTab = 'reports'; fetchStockReport();" :class="currentTab === 'reports' ? 'bg-softr-primary text-white font-semibold' : 'text-slate-400 hover:bg-slate-800/60 hover:text-white'" class="flex items-center space-x-3 px-3 py-2 rounded-md text-xs transition-all"><i class="fa-solid fa-chart-pie text-sm w-4"></i><span>Laporan Stok</span></a>
+        <a href="#" @click="currentTab = 'period_lock'; fetchPeriods();" :class="currentTab === 'period_lock' ? 'bg-softr-primary text-white font-semibold' : 'text-slate-400 hover:bg-slate-800/60 hover:text-white'" class="flex items-center space-x-3 px-3 py-2 rounded-md text-xs transition-all"><i class="fa-solid fa-lock text-sm w-4"></i><span>Lock Periode</span></a>
         <div class="pt-4 text-[10px] font-bold text-slate-500 px-3 uppercase tracking-wider mb-2">Master Data</div>
-
-        <a href="#" @click="currentTab = 'master_item'; fetchItems();" :class="currentTab === 'master_item' ? 'bg-softr-primary text-white font-semibold' : 'text-slate-400 hover:bg-slate-800/60 hover:text-white'" class="flex items-center space-x-3 px-3 py-2 rounded-md text-xs transition-all">
-          <i class="fa-solid fa-egg text-sm w-4"></i><span>Master Item</span>
-        </a>
-
-        <a href="#" @click="currentTab = 'master_farm'; fetchWarehouses();" :class="currentTab === 'master_farm' ? 'bg-softr-primary text-white font-semibold' : 'text-slate-400 hover:bg-slate-800/60 hover:text-white'" class="flex items-center space-x-3 px-3 py-2 rounded-md text-xs transition-all">
-          <i class="fa-solid fa-warehouse text-sm w-4"></i><span>Master Farm / WH</span>
-        </a>
-
+        <a href="#" @click="currentTab = 'master_item'; fetchMasterItems();" :class="currentTab === 'master_item' ? 'bg-softr-primary text-white font-semibold' : 'text-slate-400 hover:bg-slate-800/60 hover:text-white'" class="flex items-center space-x-3 px-3 py-2 rounded-md text-xs transition-all"><i class="fa-solid fa-egg text-sm w-4"></i><span>Master Item</span></a>
+        <a href="#" @click="currentTab = 'master_farm'; fetchWarehouses();" :class="currentTab === 'master_farm' ? 'bg-softr-primary text-white font-semibold' : 'text-slate-400 hover:bg-slate-800/60 hover:text-white'" class="flex items-center space-x-3 px-3 py-2 rounded-md text-xs transition-all"><i class="fa-solid fa-warehouse text-sm w-4"></i><span>Master Farm / WH</span></a>
         <div class="pt-4 text-[10px] font-bold text-slate-500 px-3 uppercase tracking-wider mb-2">Administrator</div>
-        
-        <a href="#" @click="currentTab = 'user_group'; fetchUserGroups();" :class="currentTab === 'user_group' ? 'bg-softr-primary text-white font-semibold' : 'text-slate-400 hover:bg-slate-800/60 hover:text-white'" class="flex items-center space-x-3 px-3 py-2 rounded-md text-xs transition-all">
-          <i class="fa-solid fa-users-gear text-sm w-4"></i><span>User Group / Role</span>
-        </a>
-
-        <a href="#" @click="currentTab = 'admin_user'; fetchUsers();" :class="currentTab === 'admin_user' ? 'bg-softr-primary text-white font-semibold' : 'text-slate-400 hover:bg-slate-800/60 hover:text-white'" class="flex items-center space-x-3 px-3 py-2 rounded-md text-xs transition-all">
-          <i class="fa-solid fa-user-gear text-sm w-4"></i><span>User Management</span>
-        </a>
+        <a href="#" @click="currentTab = 'user_group'; fetchUserGroups();" :class="currentTab === 'user_group' ? 'bg-softr-primary text-white font-semibold' : 'text-slate-400 hover:bg-slate-800/60 hover:text-white'" class="flex items-center space-x-3 px-3 py-2 rounded-md text-xs transition-all"><i class="fa-solid fa-users-gear text-sm w-4"></i><span>User Group / Role</span></a>
+        <a href="#" @click="currentTab = 'admin_user'; fetchUsers();" :class="currentTab === 'admin_user' ? 'bg-softr-primary text-white font-semibold' : 'text-slate-400 hover:bg-slate-800/60 hover:text-white'" class="flex items-center space-x-3 px-3 py-2 rounded-md text-xs transition-all"><i class="fa-solid fa-user-gear text-sm w-4"></i><span>User Management</span></a>
       </nav>
-
       <div class="p-3 border-t border-slate-800/80 bg-slate-950/40 flex items-center justify-between">
         <div class="flex items-center space-x-2.5">
           <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold" x-text="currentUser.name ? currentUser.name.substring(0,2).toUpperCase() : 'AD'"></div>
@@ -124,7 +86,6 @@
       </div>
     </aside>
 
-    <!-- MAIN CONTENT AREA -->
     <main class="flex-1 flex flex-col overflow-y-auto bg-softr-bg">
       <header class="bg-white border-b border-softr-border px-8 py-4 flex items-center justify-between sticky top-0 z-10">
         <div>
@@ -134,90 +95,36 @@
       </header>
 
       <div class="p-8 max-w-7xl w-full mx-auto">
-        
-        <!-- TAB 1: TRANSAKSI STOCK -->
         <template x-if="currentTab === 'transaksi'">
           <div class="space-y-4">
             <div class="bg-white p-4 rounded-xl border border-softr-border">
               <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
                 <div>
                   <h3 class="text-sm font-bold text-slate-800">Daftar Transaksi Stok</h3>
-                  <p class="text-xs text-slate-500">Kelola alur telur masuk, keluar, dan penyesuaian (Adjustment)</p>
+                  <p class="text-xs text-slate-500">Kelola pelepasan, penerimaan, dan adjustment dengan data item terhubung.</p>
                 </div>
-                <button @click="openTransModal('create')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3.5 py-2 rounded-lg font-medium flex items-center space-x-1 transition">
-                  <i class="fa-solid fa-plus"></i><span>Tambah Transaksi</span>
-                </button>
+                <button @click="openTransModal()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3.5 py-2 rounded-lg font-medium flex items-center space-x-1 transition"><i class="fa-solid fa-plus"></i><span>Tambah Transaksi</span></button>
               </div>
-
               <div class="mt-4 grid gap-3 xl:grid-cols-5">
-                <div>
-                  <label class="block text-[11px] font-semibold text-slate-500 mb-1">From Date</label>
-                  <input type="date" x-model="transFilter.from_date" class="w-full bg-slate-50 border border-softr-border rounded-lg p-2 text-xs">
-                </div>
-                <div>
-                  <label class="block text-[11px] font-semibold text-slate-500 mb-1">To Date</label>
-                  <input type="date" x-model="transFilter.to_date" class="w-full bg-slate-50 border border-softr-border rounded-lg p-2 text-xs">
-                </div>
-                <div>
-                  <label class="block text-[11px] font-semibold text-slate-500 mb-1">Farm / Warehouse</label>
-                  <select x-model="transFilter.warehouse_id" class="w-full bg-slate-50 border border-softr-border rounded-lg p-2 text-xs">
-                    <option value="">Semua Warehouse</option>
-                    <template x-for="wh in warehouses" :key="wh.id">
-                      <option :value="wh.id" x-text="wh.warehouse_name"></option>
-                    </template>
-                  </select>
-                </div>
-                <div>
-                  <label class="block text-[11px] font-semibold text-slate-500 mb-1">Cari Item</label>
-                  <input type="text" x-model="transFilter.search" placeholder="Kode atau nama item" class="w-full bg-slate-50 border border-softr-border rounded-lg p-2 text-xs">
-                </div>
+                <div><label class="block text-[11px] font-semibold text-slate-500 mb-1">From Date</label><input type="date" x-model="transFilter.from_date" class="w-full bg-slate-50 border border-softr-border rounded-lg p-2 text-xs"></div>
+                <div><label class="block text-[11px] font-semibold text-slate-500 mb-1">To Date</label><input type="date" x-model="transFilter.to_date" class="w-full bg-slate-50 border border-softr-border rounded-lg p-2 text-xs"></div>
+                <div><label class="block text-[11px] font-semibold text-slate-500 mb-1">Farm / Warehouse</label><select x-model="transFilter.warehouse_id" class="w-full bg-slate-50 border border-softr-border rounded-lg p-2 text-xs"><option value="">Semua Warehouse</option><template x-for="wh in warehouses" :key="wh.id"><option :value="wh.id" x-text="wh.warehouse_name"></option></template></select></div>
+                <div><label class="block text-[11px] font-semibold text-slate-500 mb-1">Cari Item</label><input type="text" x-model="transFilter.search" placeholder="Kode atau nama item" class="w-full bg-slate-50 border border-softr-border rounded-lg p-2 text-xs"></div>
                 <button @click="fetchTransactions()" class="bg-slate-800 text-white text-xs py-2 rounded-lg font-semibold">Retrieve</button>
               </div>
             </div>
-
             <div class="bg-white rounded-xl border border-softr-border shadow-xs overflow-hidden">
               <table class="w-full text-left border-collapse">
-                <thead class="bg-slate-50/80 border-b border-softr-border text-[11px] font-semibold text-softr-textMuted uppercase tracking-wider">
-                  <tr>
-                    <th class="py-3 px-4">No. Transaksi</th>
-                    <th class="py-3 px-4">Tanggal</th>
-                    <th class="py-3 px-4">Tipe</th>
-                    <th class="py-3 px-4">Farm / Warehouse</th>
-                    <th class="py-3 px-4">Status</th>
-                    <th class="py-3 px-4 text-center">Aksi</th>
-                  </tr>
-                </thead>
+                <thead class="bg-slate-50/80 border-b border-softr-border text-[11px] font-semibold text-softr-textMuted uppercase tracking-wider"><tr><th class="py-3 px-4">No. Transaksi</th><th class="py-3 px-4">Tanggal</th><th class="py-3 px-4">Tipe</th><th class="py-3 px-4">Farm / Warehouse</th><th class="py-3 px-4">Status</th><th class="py-3 px-4 text-center">Aksi</th></tr></thead>
                 <tbody class="divide-y divide-softr-border text-xs text-softr-textDark">
                   <template x-for="item in transactions" :key="item.id">
                     <tr class="hover:bg-slate-50/60 transition">
                       <td class="py-3 px-4 font-mono font-medium text-softr-primary" x-text="item.trans_number"></td>
                       <td class="py-3 px-4 text-softr-textMuted" x-text="item.trans_date"></td>
-                      <td class="py-3 px-4">
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium"
-                          :class="{
-                            'bg-emerald-50 text-emerald-700 border border-emerald-200': item.trans_type === 'IN',
-                            'bg-rose-50 text-rose-700 border border-rose-200': item.trans_type === 'OUT',
-                            'bg-amber-50 text-amber-700 border border-amber-200': item.trans_type === 'ADJ'
-                          }"
-                          x-text="item.trans_type">
-                        </span>
-                      </td>
-                      <td class="py-3 px-4 text-softr-textMuted" x-text="item.warehouse_name || 'Serang Farm Layer'"></td>
-                      <td class="py-3 px-4">
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold"
-                          :class="{
-                            'bg-emerald-100 text-emerald-700': item.status === 'Active',
-                            'bg-slate-100 text-slate-600': item.status === 'Posted',
-                            'bg-rose-100 text-rose-700': item.status === 'Deleted'
-                          }"
-                          x-text="item.status">
-                        </span>
-                      </td>
-                      <td class="py-3 px-4 text-center space-x-1">
-                        <button @click="viewTransDetail(item.id)" class="px-2 py-1 text-blue-600 hover:bg-blue-50 rounded font-medium"><i class="fa-solid fa-eye"></i> Detail</button>
-                        <button x-show="item.status === 'Active'" @click="openTransModal(item)" class="px-2 py-1 text-amber-600 hover:bg-amber-50 rounded font-medium"><i class="fa-solid fa-pen-to-square"></i> Edit</button>
-                        <button x-show="item.status === 'Active'" @click="deleteTransaction(item.id)" class="px-2 py-1 text-rose-600 hover:bg-rose-50 rounded font-medium"><i class="fa-solid fa-trash"></i> Hapus</button>
-                      </td>
+                      <td class="py-3 px-4"><span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium" :class="{'bg-emerald-50 text-emerald-700 border border-emerald-200': item.trans_type === 'IN','bg-rose-50 text-rose-700 border border-rose-200': item.trans_type === 'OUT','bg-amber-50 text-amber-700 border border-amber-200': item.trans_type === 'ADJ'}" x-text="item.trans_type"></span></td>
+                      <td class="py-3 px-4 text-softr-textMuted" x-text="item.warehouse_name"></td>
+                      <td class="py-3 px-4"><span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold" :class="{'bg-emerald-100 text-emerald-700': item.status === 'Active','bg-slate-100 text-slate-600': item.status === 'Posted','bg-rose-100 text-rose-700': item.status === 'Deleted'}" x-text="item.status"></span></td>
+                      <td class="py-3 px-4 text-center space-x-1"><button @click="viewTransDetail(item.id)" class="px-2 py-1 text-blue-600 hover:bg-blue-50 rounded font-medium"><i class="fa-solid fa-eye"></i> Detail</button><button x-show="item.status === 'Active'" @click="openTransModal(item)" class="px-2 py-1 text-amber-600 hover:bg-amber-50 rounded font-medium"><i class="fa-solid fa-pen-to-square"></i> Edit</button><button x-show="item.status === 'Active'" @click="deleteTransaction(item.id)" class="px-2 py-1 text-rose-600 hover:bg-rose-50 rounded font-medium"><i class="fa-solid fa-trash"></i> Hapus</button></td>
                     </tr>
                   </template>
                 </tbody>
@@ -226,187 +133,118 @@
           </div>
         </template>
 
-        <!-- TAB 2: REPORTS -->
         <template x-if="currentTab === 'reports'">
           <div class="space-y-4">
             <div class="bg-white p-4 rounded-xl border border-softr-border">
-              <h3 class="text-sm font-bold text-slate-800 mb-2">Laporan Ringkasan Stok Telur</h3>
-              <p class="text-xs text-slate-500">Pilih lokasi Farm untuk melihat posisi stok real-time</p>
+              <h3 class="text-sm font-bold text-slate-800 mb-3">Laporan Stok</h3>
+              <div class="grid gap-3 md:grid-cols-5">
+                <div><label class="block text-[11px] font-semibold text-slate-500 mb-1">Group By</label><select x-model="reportForm.group_by" class="w-full bg-slate-50 border border-softr-border rounded-lg p-2 text-xs"><option value="warehouse">Warehouse</option><option value="item">Item</option></select></div>
+                <div><label class="block text-[11px] font-semibold text-slate-500 mb-1">From Date</label><input type="date" x-model="reportForm.from_date" class="w-full bg-slate-50 border border-softr-border rounded-lg p-2 text-xs"></div>
+                <div><label class="block text-[11px] font-semibold text-slate-500 mb-1">To Date</label><input type="date" x-model="reportForm.to_date" class="w-full bg-slate-50 border border-softr-border rounded-lg p-2 text-xs"></div>
+                <div><label class="block text-[11px] font-semibold text-slate-500 mb-1">Warehouse</label><select x-model="reportForm.warehouse_id" class="w-full bg-slate-50 border border-softr-border rounded-lg p-2 text-xs"><option value="">Semua</option><template x-for="wh in warehouses" :key="wh.id"><option :value="wh.id" x-text="wh.warehouse_name"></option></template></select></div>
+                <button @click="fetchStockReport()" class="bg-slate-800 text-white text-xs py-2 rounded-lg font-semibold">Retrieve</button>
+              </div>
+              <div class="mt-3"><label class="block text-[11px] font-semibold text-slate-500 mb-1">Item (opsional)</label><select x-model="reportForm.item_ids" multiple class="w-full bg-slate-50 border border-softr-border rounded-lg p-2 text-xs h-24"><template x-for="itm in itemsList" :key="itm.id"><option :value="itm.id" x-text="itm.item_code + ' - ' + itm.item_name"></option></template></select></div>
             </div>
             <div class="bg-white rounded-xl border border-softr-border overflow-hidden">
               <table class="w-full text-left border-collapse">
-                <thead class="bg-slate-50 border-b text-[11px] font-semibold text-slate-500 uppercase">
-                  <tr>
-                    <th class="py-3 px-4">Kode Item</th>
-                    <th class="py-3 px-4">Nama Telur / Item</th>
-                    <th class="py-3 px-4">Total Stok (Butir / Pcs)</th>
-                    <th class="py-3 px-4">Total Berat (Kg)</th>
-                  </tr>
-                </thead>
+                <thead class="bg-slate-50 border-b text-[11px] font-semibold text-slate-500 uppercase"><tr><th class="py-3 px-4">Warehouse</th><th class="py-3 px-4">Item</th><th class="py-3 px-4">Saldo Awal</th><th class="py-3 px-4">Adj</th><th class="py-3 px-4">Masuk</th><th class="py-3 px-4">Keluar</th><th class="py-3 px-4">Saldo Akhir</th></tr></thead>
                 <tbody class="divide-y text-xs">
-                  <template x-for="r in stockReport" :key="r.item_code">
-                    <tr>
-                      <td class="py-3 px-4 font-mono text-blue-600" x-text="r.item_code"></td>
-                      <td class="py-3 px-4 font-medium" x-text="r.item_name"></td>
-                      <td class="py-3 px-4 font-bold text-slate-800" x-text="r.total_pcs || 0"></td>
-                      <td class="py-3 px-4 font-bold text-emerald-600" x-text="(r.total_weight || 0).toFixed(2)"></td>
-                    </tr>
-                  </template>
+                  <template x-for="r in stockReport" :key="r.warehouse_id + '-' + r.item_id"><tr><td class="py-3 px-4" x-text="r.warehouse_name"></td><td class="py-3 px-4" x-text="r.item_name"></td><td class="py-3 px-4" x-text="(r.opening_pcs || 0).toFixed(0)"></td><td class="py-3 px-4" x-text="(r.adjustment_pcs || 0).toFixed(0)"></td><td class="py-3 px-4" x-text="(r.in_pcs || 0).toFixed(0)"></td><td class="py-3 px-4" x-text="(r.out_pcs || 0).toFixed(0)"></td><td class="py-3 px-4 font-semibold" x-text="(r.closing_pcs || 0).toFixed(0)"></td></tr></template>
                 </tbody>
               </table>
             </div>
           </div>
         </template>
 
-        <!-- TAB 3: MASTER ITEM -->
         <template x-if="currentTab === 'master_item'">
           <div class="space-y-4">
-            <div class="flex justify-between items-center bg-white p-4 rounded-xl border border-softr-border">
-              <h3 class="text-sm font-bold">Master Katalog Item</h3>
-              <button @click="showItemModal = true" class="bg-blue-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Tambah Item</button>
-            </div>
+            <div class="flex justify-between items-center bg-white p-4 rounded-xl border border-softr-border"><h3 class="text-sm font-bold">Master Item</h3><button @click="showItemModal = true; itemForm = { id:null, item_code:'', item_name:'', category:'', base_unit:'Butir', secondary_unit:'KG', status:'A' }" class="bg-blue-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Tambah Item</button></div>
             <div class="bg-white rounded-xl border border-softr-border overflow-hidden">
-              <table class="w-full text-left border-collapse text-xs">
-                <thead class="bg-slate-50 uppercase text-slate-500">
-                  <tr>
-                    <th class="p-3">Kode</th>
-                    <th class="p-3">Nama Item</th>
-                    <th class="p-3">Kategori</th>
-                    <th class="p-3">Satuan Sekunder</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y">
-                  <template x-for="i in itemsList" :key="i.id">
-                    <tr>
-                      <td class="p-3 font-mono" x-text="i.item_code"></td>
-                      <td class="p-3 font-medium" x-text="i.item_name"></td>
-                      <td class="p-3" x-text="i.category"></td>
-                      <td class="p-3" x-text="i.secondary_unit"></td>
-                    </tr>
-                  </template>
-                </tbody>
-              </table>
+              <table class="w-full text-left border-collapse text-xs"><thead class="bg-slate-50 uppercase text-slate-500"><tr><th class="p-3">Kode</th><th class="p-3">Nama Item</th><th class="p-3">Kategori</th><th class="p-3">Status</th><th class="p-3">Aksi</th></tr></thead><tbody class="divide-y"><template x-for="i in masterItems" :key="i.id"><tr><td class="p-3 font-mono" x-text="i.item_code"></td><td class="p-3 font-medium" x-text="i.item_name"></td><td class="p-3" x-text="i.category"></td><td class="p-3" x-text="i.status"></td><td class="p-3 space-x-2"><button @click="editItem(i)" class="text-amber-600">Edit</button><button @click="deleteItem(i.id)" class="text-rose-600">Delete</button></td></tr></template></tbody></table>
             </div>
           </div>
         </template>
 
-        <!-- TAB 4: USER GROUP / ROLE PERMISSION -->
+        <template x-if="currentTab === 'master_farm'">
+          <div class="space-y-4">
+            <div class="bg-white p-4 rounded-xl border border-softr-border" x-show="currentUser.role === 'Superadmin' || currentUser.role === 'Administrator'">
+              <h3 class="text-sm font-bold mb-3">Tambah Warehouse / Farm</h3>
+              <div class="grid gap-3 md:grid-cols-3">
+                <input type="text" x-model="warehouseForm.warehouse_code" placeholder="Kode warehouse" class="w-full bg-slate-50 border border-softr-border rounded-lg p-2 text-xs">
+                <input type="text" x-model="warehouseForm.warehouse_name" placeholder="Nama warehouse" class="w-full bg-slate-50 border border-softr-border rounded-lg p-2 text-xs">
+                <button @click="saveWarehouse()" class="bg-blue-600 text-white text-xs py-2 rounded-lg">Simpan Warehouse</button>
+              </div>
+            </div>
+            <div class="bg-white rounded-xl border border-softr-border overflow-hidden"><table class="w-full text-left border-collapse text-xs"><thead class="bg-slate-50 uppercase text-slate-500"><tr><th class="p-3">Kode</th><th class="p-3">Nama Warehouse</th></tr></thead><tbody class="divide-y"><template x-for="wh in warehouses" :key="wh.id"><tr><td class="p-3 font-mono" x-text="wh.warehouse_code"></td><td class="p-3" x-text="wh.warehouse_name"></td></tr></template></tbody></table></div>
+          </div>
+        </template>
+
         <template x-if="currentTab === 'user_group'">
           <div class="space-y-4">
-            <div class="flex justify-between items-center bg-white p-4 rounded-xl border border-softr-border">
-              <h3 class="text-sm font-bold">Setup User Group & Role</h3>
+            <div class="bg-white p-4 rounded-xl border border-softr-border" x-show="currentUser.role === 'Superadmin' || currentUser.role === 'Administrator'">
+              <h3 class="text-sm font-bold mb-3">Tambah User Group</h3>
+              <div class="grid gap-3 md:grid-cols-3">
+                <input type="text" x-model="userGroupForm.group_name" placeholder="Nama group" class="w-full bg-slate-50 border border-softr-border rounded-lg p-2 text-xs">
+                <input type="text" x-model="userGroupForm.description" placeholder="Deskripsi" class="w-full bg-slate-50 border border-softr-border rounded-lg p-2 text-xs">
+                <button @click="saveUserGroup()" class="bg-blue-600 text-white text-xs py-2 rounded-lg">Simpan Group</button>
+              </div>
             </div>
-            <div class="bg-white rounded-xl border border-softr-border overflow-hidden p-4">
-              <table class="w-full text-left text-xs divide-y">
-                <thead>
-                  <tr class="uppercase text-slate-500">
-                    <th class="p-2">Group Name</th>
-                    <th class="p-2">Deskripsi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <template x-for="g in userGroups" :key="g.id">
-                    <tr>
-                      <td class="p-2 font-bold" x-text="g.group_name"></td>
-                      <td class="p-2" x-text="g.description"></td>
-                    </tr>
-                  </template>
-                </tbody>
-              </table>
-            </div>
+            <div class="bg-white rounded-xl border border-softr-border overflow-hidden p-4"><table class="w-full text-left text-xs divide-y"><thead><tr class="uppercase text-slate-500"><th class="p-2">Group Name</th><th class="p-2">Deskripsi</th></tr></thead><tbody><template x-for="g in userGroups" :key="g.id"><tr><td class="p-2 font-bold" x-text="g.group_name"></td><td class="p-2" x-text="g.description"></td></tr></template></tbody></table></div>
           </div>
         </template>
 
-        <!-- TAB 5: LOCK PERIODE -->
         <template x-if="currentTab === 'period_lock'">
           <div class="space-y-6">
             <div class="bg-white p-5 rounded-xl border border-softr-border shadow-xs">
               <h3 class="text-sm font-bold text-softr-textDark mb-3">Eksekusi Lock / Unlock Periode</h3>
-              <div class="flex items-end space-x-3 max-w-lg">
-                <div class="flex-1">
-                  <label class="block text-[11px] font-semibold text-softr-textMuted mb-1">Bulan</label>
-                  <select x-model="lockForm.month" class="w-full bg-slate-50 border border-softr-border rounded-lg p-2 text-xs">
-                    <option value="5">Mei (05)</option>
-                    <option value="6">Juni (06)</option>
-                    <option value="7">Juli (07)</option>
-                  </select>
-                </div>
-                <div class="flex-1">
-                  <label class="block text-[11px] font-semibold text-softr-textMuted mb-1">Tahun</label>
-                  <select x-model="lockForm.year" class="w-full bg-slate-50 border border-softr-border rounded-lg p-2 text-xs">
-                    <option value="2026">2026</option>
-                  </select>
-                </div>
-                <button @click="toggleLockPeriod('LOCK')" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition"><i class="fa-solid fa-lock mr-1"></i> Lock</button>
-                <button @click="toggleLockPeriod('UNLOCK')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition"><i class="fa-solid fa-lock-open mr-1"></i> Unlock</button>
+              <div class="grid gap-3 md:grid-cols-4">
+                <div><label class="block text-[11px] font-semibold text-softr-textMuted mb-1">Warehouse</label><select x-model="lockForm.warehouse_id" class="w-full bg-slate-50 border border-softr-border rounded-lg p-2 text-xs"><option value="">Semua</option><template x-for="wh in warehouses" :key="wh.id"><option :value="wh.id" x-text="wh.warehouse_name"></option></template></select></div>
+                <div><label class="block text-[11px] font-semibold text-softr-textMuted mb-1">Bulan</label><select x-model="lockForm.month" class="w-full bg-slate-50 border border-softr-border rounded-lg p-2 text-xs"><option value="5">Mei (05)</option><option value="6">Juni (06)</option><option value="7">Juli (07)</option></select></div>
+                <div><label class="block text-[11px] font-semibold text-softr-textMuted mb-1">Tahun</label><select x-model="lockForm.year" class="w-full bg-slate-50 border border-softr-border rounded-lg p-2 text-xs"><option value="2026">2026</option></select></div>
+                <div class="flex items-end space-x-2"><button @click="toggleLockPeriod('LOCK')" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition"><i class="fa-solid fa-lock mr-1"></i> Lock</button><button @click="toggleLockPeriod('UNLOCK')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition"><i class="fa-solid fa-lock-open mr-1"></i> Unlock</button></div>
               </div>
             </div>
+            <div class="bg-white rounded-xl border border-softr-border overflow-hidden"><table class="w-full text-left border-collapse text-xs"><thead class="bg-slate-50 uppercase text-slate-500"><tr><th class="p-3">Warehouse</th><th class="p-3">Periode</th><th class="p-3">Status</th></tr></thead><tbody class="divide-y"><template x-for="p in periods" :key="p.id"><tr><td class="p-3" x-text="p.warehouse_name"></td><td class="p-3" x-text="p.period_month + '-' + p.period_year"></td><td class="p-3" x-text="p.status"></td></tr></template></tbody></table></div>
           </div>
         </template>
 
+        <template x-if="currentTab === 'admin_user'">
+          <div class="space-y-4">
+            <div class="bg-white p-4 rounded-xl border border-softr-border" x-show="currentUser.role === 'Superadmin' || currentUser.role === 'Administrator'">
+              <button @click="addUser()" class="bg-blue-600 text-white text-xs px-3 py-1.5 rounded-lg">+ Tambah User</button>
+            </div>
+            <div class="bg-white rounded-xl border border-softr-border overflow-hidden"><table class="w-full text-left border-collapse text-xs"><thead class="bg-slate-50 uppercase text-slate-500"><tr><th class="p-3">Username</th><th class="p-3">Nama</th><th class="p-3">Role</th><th class="p-3">Status</th></tr></thead><tbody class="divide-y"><template x-for="u in usersList" :key="u.id"><tr><td class="p-3" x-text="u.username"></td><td class="p-3" x-text="u.name"></td><td class="p-3" x-text="u.role"></td><td class="p-3" x-text="u.status"></td></tr></template></tbody></table></div>
+          </div>
+        </template>
       </div>
     </main>
   </div>
 
-  <!-- MODAL TRANSAKSI HEADER + DETAIL -->
   <div x-show="showTransModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-xl border border-softr-border max-w-2xl w-full p-6 shadow-xl space-y-4">
-      <div class="flex justify-between items-center border-b pb-3">
-        <h3 class="font-bold text-sm text-slate-800">Form Transaksi Stok + Detail Item</h3>
-        <button @click="showTransModal = false" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-
+      <div class="flex justify-between items-center border-b pb-3"><h3 class="font-bold text-sm text-slate-800">Form Transaksi Stok + Detail Item</h3><button @click="showTransModal = false" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button></div>
       <form @submit.prevent="saveTransactionWithDetails()" class="space-y-4">
-        <div class="grid grid-cols-3 gap-3">
-          <div>
-            <label class="block text-xs font-semibold mb-1">Tanggal</label>
-            <input type="date" x-model="transForm.trans_date" class="w-full bg-slate-50 border p-2 text-xs rounded-lg" required>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold mb-1">Tipe</label>
-            <select x-model="transForm.trans_type" class="w-full bg-slate-50 border p-2 text-xs rounded-lg">
-              <option value="IN">Barang Masuk (IN)</option>
-              <option value="OUT">Barang Keluar (OUT)</option>
-              <option value="ADJ">Adjustment (ADJ)</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold mb-1">Farm / Warehouse</label>
-            <select x-model="transForm.warehouse_id" class="w-full bg-slate-50 border p-2 text-xs rounded-lg">
-              <template x-for="wh in warehouses" :key="wh.id">
-                <option :value="wh.id" x-text="wh.warehouse_name"></option>
-              </template>
-            </select>
-          </div>
-        </div>
-
-        <div class="border-t pt-3">
-          <div class="flex justify-between items-center mb-2">
-            <h4 class="text-xs font-bold text-slate-700">Detail Item Transaksi</h4>
-            <button type="button" @click="addDetailRow()" class="text-[11px] bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded font-semibold text-blue-600">+ Tambah Baris</button>
-          </div>
-          
-          <div class="space-y-2 max-h-48 overflow-y-auto">
-            <template x-for="(d, idx) in transForm.details" :key="idx">
-              <div class="flex items-center space-x-2 bg-slate-50 p-2 rounded-lg text-xs">
-                <select x-model="d.item_id" class="flex-1 bg-white border p-1.5 rounded">
-                  <template x-for="itm in itemsList" :key="itm.id">
-                    <option :value="itm.id" x-text="itm.item_name"></option>
-                  </template>
-                </select>
-                <input type="number" x-model="d.qty_pcs" placeholder="Pcs" class="w-20 bg-white border p-1.5 rounded">
-                <input type="number" step="0.01" x-model="d.qty_weight" placeholder="Kg" class="w-20 bg-white border p-1.5 rounded">
-                <button type="button" @click="transForm.details.splice(idx, 1)" class="text-rose-600 p-1"><i class="fa-solid fa-trash"></i></button>
-              </div>
-            </template>
-          </div>
-        </div>
-
-        <div class="pt-2 flex space-x-2">
-          <button type="button" @click="showTransModal = false" class="flex-1 bg-slate-100 py-2 rounded-lg text-xs font-semibold">Batal</button>
-          <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-lg text-xs font-semibold">Simpan Transaksi</button>
-        </div>
+        <div class="grid grid-cols-3 gap-3"><div><label class="block text-xs font-semibold mb-1">Tanggal</label><input type="date" x-model="transForm.trans_date" class="w-full bg-slate-50 border p-2 text-xs rounded-lg" required></div><div><label class="block text-xs font-semibold mb-1">Tipe</label><select x-model="transForm.trans_type" class="w-full bg-slate-50 border p-2 text-xs rounded-lg"><option value="IN">Barang Masuk (IN)</option><option value="OUT">Barang Keluar (OUT)</option><option value="ADJ">Adjustment (ADJ)</option></select></div><div><label class="block text-xs font-semibold mb-1">Farm / Warehouse</label><select x-model="transForm.warehouse_id" class="w-full bg-slate-50 border p-2 text-xs rounded-lg"><template x-for="wh in warehouses" :key="wh.id"><option :value="wh.id" x-text="wh.warehouse_name"></option></template></select></div></div>
+        <div><label class="block text-xs font-semibold mb-1">Remark / Notes</label><textarea x-model="transForm.remark" rows="2" class="w-full bg-slate-50 border p-2 text-xs rounded-lg"></textarea></div>
+        <div class="border-t pt-3"><div class="flex justify-between items-center mb-2"><h4 class="text-xs font-bold text-slate-700">Detail Item Transaksi</h4><button type="button" @click="addDetailRow()" class="text-[11px] bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded font-semibold text-blue-600">+ Tambah Baris</button></div><div class="space-y-2 max-h-48 overflow-y-auto"><template x-for="(d, idx) in transForm.details" :key="idx"><div class="flex items-center space-x-2 bg-slate-50 p-2 rounded-lg text-xs"><select x-model="d.item_id" class="flex-1 bg-white border p-1.5 rounded"><template x-for="itm in itemsList" :key="itm.id"><option :value="itm.id" x-text="itm.item_code + ' - ' + itm.item_name"></option></template></select><input type="number" x-model="d.qty_pcs" placeholder="Pcs" class="w-20 bg-white border p-1.5 rounded"><input type="number" step="0.01" x-model="d.qty_weight" placeholder="Kg" class="w-20 bg-white border p-1.5 rounded"><button type="button" @click="transForm.details.splice(idx, 1)" class="text-rose-600 p-1"><i class="fa-solid fa-trash"></i></button></div></template></div></div>
+        <div class="pt-2 flex space-x-2"><button type="button" @click="showTransModal = false" class="flex-1 bg-slate-100 py-2 rounded-lg text-xs font-semibold">Batal</button><button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-lg text-xs font-semibold">Simpan Transaksi</button></div>
       </form>
+    </div>
+  </div>
+
+  <div x-show="showItemModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+    <div class="bg-white rounded-xl border border-softr-border max-w-xl w-full p-6 shadow-xl space-y-4">
+      <div class="flex justify-between items-center border-b pb-3"><h3 class="font-bold text-sm text-slate-800">Form Master Item</h3><button @click="showItemModal = false" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button></div>
+      <div class="grid gap-3 md:grid-cols-2">
+        <input type="text" x-model="itemForm.item_code" placeholder="Kode item" class="w-full bg-slate-50 border border-softr-border rounded-lg p-2 text-xs">
+        <input type="text" x-model="itemForm.item_name" placeholder="Nama item" class="w-full bg-slate-50 border border-softr-border rounded-lg p-2 text-xs">
+        <input type="text" x-model="itemForm.category" placeholder="Kategori" class="w-full bg-slate-50 border border-softr-border rounded-lg p-2 text-xs">
+        <input type="text" x-model="itemForm.base_unit" placeholder="Base unit" class="w-full bg-slate-50 border border-softr-border rounded-lg p-2 text-xs">
+        <input type="text" x-model="itemForm.secondary_unit" placeholder="Secondary unit" class="w-full bg-slate-50 border border-softr-border rounded-lg p-2 text-xs">
+        <select x-model="itemForm.status" class="w-full bg-slate-50 border border-softr-border rounded-lg p-2 text-xs"><option value="A">A</option><option value="U">U</option></select>
+      </div>
+      <div class="flex space-x-2"><button @click="showItemModal = false" class="flex-1 bg-slate-100 py-2 rounded-lg text-xs font-semibold">Batal</button><button @click="saveItem()" class="flex-1 bg-blue-600 text-white py-2 rounded-lg text-xs font-semibold">Simpan</button></div>
     </div>
   </div>
 
@@ -417,99 +255,96 @@
         currentUser: {},
         currentTab: 'transaksi',
         showTransModal: false,
+        showItemModal: false,
+        loginError: '',
         loginForm: { username: '', password: '' },
-        transForm: { trans_date: '', trans_type: 'IN', warehouse_id: 1, details: [] },
+        transFilter: { from_date: '', to_date: '', warehouse_id: '', search: '' },
+        transForm: { id: null, trans_date: '', trans_type: 'IN', warehouse_id: '', remark: '', details: [] },
         transactions: [],
         periods: [],
         itemsList: [],
         warehouses: [],
         userGroups: [],
         stockReport: [],
-        lockForm: { month: '5', year: '2026' },
-        titleMap: {
-          'transaksi': 'Transaksi Stock',
-          'reports': 'Laporan Ringkasan Stok',
-          'master_item': 'Master Katalog Item Telur',
-          'master_farm': 'Master Farm & Warehouse',
-          'user_group': 'User Group & Permissions',
-          'period_lock': 'Penguncian Periode'
-        },
-
-        initApp() {
-          if(this.isLoggedIn) {
-            this.fetchTransactions();
-            this.fetchWarehouses();
-            this.fetchItems();
-          }
-        },
-
+        masterItems: [],
+        usersList: [],
+        lockForm: { month: '7', year: '2026', warehouse_id: '' },
+        itemForm: { id: null, item_code: '', item_name: '', category: '', base_unit: 'Butir', secondary_unit: 'KG', status: 'A' },
+        warehouseForm: { warehouse_code: '', warehouse_name: '', company_id: 1 },
+        userGroupForm: { group_name: '', description: '' },
+        reportForm: { group_by: 'warehouse', from_date: '', to_date: '', warehouse_id: '', item_ids: [] },
+        titleMap: { transaksi: 'Transaksi Stock', reports: 'Laporan Ringkasan Stok', master_item: 'Master Item', master_farm: 'Master Farm & Warehouse', user_group: 'User Group & Permissions', period_lock: 'Penguncian Periode', admin_user: 'User Management' },
+        initApp() { this.fetchWarehouses(); this.fetchItems(); },
         async handleLogin() {
-          const res = await fetch('/api/login', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(this.loginForm) });
+          const res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(this.loginForm) });
           const data = await res.json();
-          if(data.success) {
+          if (data.success) {
             this.isLoggedIn = true;
             this.currentUser = data.user;
-            this.fetchTransactions();
+            this.loginError = '';
             this.fetchWarehouses();
             this.fetchItems();
+            this.fetchTransactions();
+            this.fetchPeriods();
+            this.fetchUserGroups();
+            this.fetchStockReport();
+            this.fetchMasterItems();
+            this.fetchUsers();
+          } else {
+            this.loginError = data.message || 'Login gagal';
           }
         },
-
         async fetchTransactions() {
-          const res = await fetch('/api/transactions');
+          const params = new URLSearchParams({ user_id: this.currentUser.id ?? 0, role: this.currentUser.role || '', ...this.transFilter });
+          const res = await fetch(`/api/transactions?${params.toString()}`);
           const data = await res.json();
           if (data.success) this.transactions = data.data;
         },
-
-        async fetchItems() {
-          const res = await fetch('/api/items');
-          const data = await res.json();
-          if (data.success) this.itemsList = data.data;
-        },
-
-        async fetchWarehouses() {
-          const res = await fetch('/api/warehouses');
-          const data = await res.json();
-          if (data.success) this.warehouses = data.data;
-        },
-
-        async fetchUserGroups() {
-          const res = await fetch('/api/user-groups');
-          const data = await res.json();
-          if (data.success) this.userGroups = data.data;
-        },
-
-        async fetchStockReport() {
-          const res = await fetch('/api/reports/stock-summary');
-          const data = await res.json();
-          if (data.success) this.stockReport = data.data;
-        },
-
-        openTransModal() {
-          this.transForm.trans_date = new Date().toISOString().split('T')[0];
-          this.transForm.details = [{ item_id: this.itemsList[0]?.id || 1, qty_pcs: 100, qty_weight: 6.2 }];
+        async fetchItems() { const res = await fetch('/api/items'); const data = await res.json(); if (data.success) this.itemsList = data.data; },
+        async fetchWarehouses() { const params = new URLSearchParams({ user_id: this.currentUser.id ?? 0, role: this.currentUser.role || '' }); const res = await fetch(`/api/warehouses?${params.toString()}`); const data = await res.json(); if (data.success) this.warehouses = data.data; },
+        async fetchUserGroups() { const res = await fetch('/api/user-groups'); const data = await res.json(); if (data.success) this.userGroups = data.data; },
+        async fetchStockReport() { const params = new URLSearchParams({ user_id: this.currentUser.id ?? 0, role: this.currentUser.role || '', ...this.reportForm, item_ids: this.reportForm.item_ids.join(',') }); const res = await fetch(`/api/reports/stock-summary?${params.toString()}`); const data = await res.json(); if (data.success) this.stockReport = data.data; },
+        async fetchPeriods() { const params = new URLSearchParams({ user_id: this.currentUser.id ?? 0, role: this.currentUser.role || '', warehouse_id: this.lockForm.warehouse_id || '' }); const res = await fetch(`/api/periods?${params.toString()}`); const data = await res.json(); if (data.success) this.periods = data.data; },
+        async fetchMasterItems() { const res = await fetch('/api/master/items'); const data = await res.json(); if (data.success) this.masterItems = data.data; },
+        async fetchUsers() { const res = await fetch('/api/users'); const data = await res.json(); if (data.success) this.usersList = data.data; },
+        openTransModal(item = null) {
+          this.transForm = { id: null, trans_date: new Date().toISOString().split('T')[0], trans_type: 'IN', warehouse_id: this.warehouses[0]?.id || '', remark: '', details: [] };
+          if (item && item.id) {
+            this.transForm.id = item.id;
+            fetch(`/api/transactions/${item.id}?user_id=${this.currentUser.id ?? 0}&role=${this.currentUser.role || ''}`).then(r => r.json()).then(data => {
+              if (data.success) {
+                this.transForm.trans_date = data.data.trans_date;
+                this.transForm.trans_type = data.data.trans_type;
+                this.transForm.warehouse_id = data.data.warehouse_id;
+                this.transForm.remark = data.data.remark || '';
+                this.transForm.details = data.data.details.map(d => ({ item_id: d.item_id, qty_pcs: d.qty_pcs, qty_weight: d.qty_weight, notes: d.notes || '' }));
+                if (this.transForm.details.length === 0) this.addDetailRow();
+              }
+            });
+          } else {
+            this.addDetailRow();
+          }
           this.showTransModal = true;
         },
-
-        addDetailRow() {
-          this.transForm.details.push({ item_id: this.itemsList[0]?.id || 1, qty_pcs: 0, qty_weight: 0 });
-        },
-
+        addDetailRow() { this.transForm.details.push({ item_id: this.itemsList[0]?.id || 1, qty_pcs: 0, qty_weight: 0, notes: '' }); },
         async saveTransactionWithDetails() {
-          const res = await fetch('/api/transactions-with-details', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ...this.transForm, created_by: this.currentUser.name })
-          });
+          const payload = { ...this.transForm, created_by: this.currentUser.name, user_id: this.currentUser.id ?? 0, role: this.currentUser.role || '' };
+          const url = this.transForm.id ? `/api/transactions/${this.transForm.id}` : '/api/transactions-with-details';
+          const method = this.transForm.id ? 'PUT' : 'POST';
+          const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
           const data = await res.json();
-          if (data.success) {
-            this.showTransModal = false;
-            this.fetchTransactions();
-          } else {
-            alert(data.message);
-          }
-        }
-      }
+          if (data.success) { this.showTransModal = false; this.fetchTransactions(); this.fetchStockReport(); } else { alert(data.message || 'Gagal menyimpan transaksi'); }
+        },
+        async viewTransDetail(id) { const res = await fetch(`/api/transactions/${id}?user_id=${this.currentUser.id ?? 0}&role=${this.currentUser.role || ''}`); const data = await res.json(); if (data.success) { alert(`Detail transaksi ${data.data.trans_number}\nWarehouse: ${data.data.warehouse_name || '-'}\nRemark: ${data.data.remark || '-'}\nJumlah item: ${data.data.details.length}`); } },
+        async deleteTransaction(id) { if (!confirm('Hapus transaksi ini?')) return; const res = await fetch(`/api/transactions/${id}?user_id=${this.currentUser.id ?? 0}&role=${this.currentUser.role || ''}`, { method: 'DELETE' }); const data = await res.json(); if (data.success) { this.fetchTransactions(); } else { alert(data.message || 'Gagal menghapus transaksi'); } },
+        async saveItem() { const payload = { ...this.itemForm, created_by: this.currentUser.name, user_role: this.currentUser.role }; const method = this.itemForm.id ? 'PUT' : 'POST'; const url = this.itemForm.id ? `/api/master/items/${this.itemForm.id}` : '/api/master/items'; const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); const data = await res.json(); if (data.success) { this.showItemModal = false; this.itemForm = { id: null, item_code: '', item_name: '', category: '', base_unit: 'Butir', secondary_unit: 'KG', status: 'A' }; this.fetchItems(); this.fetchMasterItems(); } else { alert(data.message || 'Gagal menyimpan item'); } },
+        async editItem(item) { this.itemForm = { ...item }; this.showItemModal = true; },
+        async deleteItem(id) { if (!confirm('Proses delete item?')) return; const res = await fetch(`/api/master/items/${id}?user_role=${this.currentUser.role}`, { method: 'DELETE' }); const data = await res.json(); if (data.success) { this.fetchItems(); this.fetchMasterItems(); } else { alert(data.message || 'Gagal menghapus item'); } },
+        async saveWarehouse() { const res = await fetch('/api/master/warehouses', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...this.warehouseForm, user_role: this.currentUser.role }) }); const data = await res.json(); if (data.success) { this.warehouseForm = { warehouse_code: '', warehouse_name: '', company_id: 1 }; this.fetchWarehouses(); } else { alert(data.message || 'Gagal menyimpan warehouse'); } },
+        async saveUserGroup() { const res = await fetch('/api/user-groups', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...this.userGroupForm, user_role: this.currentUser.role }) }); const data = await res.json(); if (data.success) { this.userGroupForm = { group_name: '', description: '' }; this.fetchUserGroups(); } else { alert(data.message || 'Gagal menyimpan group'); } },
+        async toggleLockPeriod(action) { const payload = { month: this.lockForm.month, year: this.lockForm.year, action, warehouse_id: this.lockForm.warehouse_id || this.warehouses[0]?.id, action_by: this.currentUser.name, user_id: this.currentUser.id ?? 0, role: this.currentUser.role || '' }; const res = await fetch('/api/period/toggle-lock', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); const data = await res.json(); if (data.success) { this.fetchPeriods(); } else { alert(data.message || 'Gagal mengubah lock periode'); } },
+        async addUser() { const res = await fetch('/api/users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: prompt('Username'), name: prompt('Nama'), password: prompt('Password'), role: prompt('Role'), user_role: this.currentUser.role }) }); const data = await res.json(); if (data.success) { this.fetchUsers(); } else { alert(data.message || 'Gagal menambah user'); } }
+      };
     }
   </script>
 </body>
