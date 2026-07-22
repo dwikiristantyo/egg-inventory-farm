@@ -183,11 +183,31 @@
                       <th class="py-3 px-4">Tanggal</th>
                       <th class="py-3 px-4">Item</th>
                       <th class="py-3 px-4">Notes</th>
-                      <th class="py-3 px-4">Saldo Awal</th>
-                      <th class="py-3 px-4">Adjustment</th>
-                      <th class="py-3 px-4">Masuk</th>
-                      <th class="py-3 px-4">Keluar</th>
-                      <th class="py-3 px-4">Saldo Akhir</th>
+
+                      <th class="py-3 px-4">Saldo Awal (pcs)</th>
+                      <th class="py-3 px-4">Unit</th>
+                      <th class="py-3 px-4">Saldo Awal (weight)</th>
+                      <th class="py-3 px-4">Unit</th>
+
+                      <th class="py-3 px-4">Adjustment (pcs)</th>
+                      <th class="py-3 px-4">Unit</th>
+                      <th class="py-3 px-4">Adjustment (weight)</th>
+                      <th class="py-3 px-4">Unit</th>
+
+                      <th class="py-3 px-4">Masuk (pcs)</th>
+                      <th class="py-3 px-4">Unit</th>
+                      <th class="py-3 px-4">Masuk (weight)</th>
+                      <th class="py-3 px-4">Unit</th>
+
+                      <th class="py-3 px-4">Keluar (pcs)</th>
+                      <th class="py-3 px-4">Unit</th>
+                      <th class="py-3 px-4">Keluar (weight)</th>
+                      <th class="py-3 px-4">Unit</th>
+
+                      <th class="py-3 px-4">Saldo Akhir (pcs)</th>
+                      <th class="py-3 px-4">Unit</th>
+                      <th class="py-3 px-4">Saldo Akhir (weight)</th>
+                      <th class="py-3 px-4">Unit</th>
                     </tr>
                   </thead>
                   <tbody class="divide-y text-xs">
@@ -197,11 +217,31 @@
                         <td class="py-3 px-4" x-text="r.trans_date || ''"></td>
                         <td class="py-3 px-4" x-text="r.item_name || ''"></td>
                         <td class="py-3 px-4" x-text="r.notes || ''"></td>
-                        <td class="py-3 px-4" x-text="((r.saldo_awal_qty_pcs !== undefined ? r.saldo_awal_qty_pcs : r.saldo_awal || 0) || 0).toFixed(0)"></td>
-                        <td class="py-3 px-4" x-text="((r.adjustment_qty_pcs !== undefined ? r.adjustment_qty_pcs : r.adjustment_pcs || 0) || 0).toFixed(0)"></td>
-                        <td class="py-3 px-4" x-text="((r.in_qty_pcs !== undefined ? r.in_qty_pcs : r.in_pcs || 0) || 0).toFixed(0)"></td>
-                        <td class="py-3 px-4" x-text="((r.out_qty_pcs !== undefined ? r.out_qty_pcs : r.out_pcs || 0) || 0).toFixed(0)"></td>
-                        <td class="py-3 px-4 font-semibold" x-text="((r.balance_qty_pcs !== undefined ? r.balance_qty_pcs : r.closing_pcs || 0) || 0).toFixed(0)"></td>
+
+                        <td class="py-3 px-4" x-text="((r.saldo_awal_qty_pcs !== undefined ? r.saldo_awal_qty_pcs : 0) || 0).toFixed(0)"></td>
+                        <td class="py-3 px-4" x-text="r.saldo_awal_base_unit || ''"></td>
+                        <td class="py-3 px-4" x-text="((r.saldo_awal_qty_weight !== undefined ? r.saldo_awal_qty_weight : 0) || 0).toFixed(2)"></td>
+                        <td class="py-3 px-4" x-text="r.saldo_awal_secondary_unit || ''"></td>
+
+                        <td class="py-3 px-4" x-text="((r.adjustment_qty_pcs !== undefined ? r.adjustment_qty_pcs : 0) || 0).toFixed(0)"></td>
+                        <td class="py-3 px-4" x-text="r.adjustment_base_unit || ''"></td>
+                        <td class="py-3 px-4" x-text="((r.adjustment_qty_weight !== undefined ? r.adjustment_qty_weight : 0) || 0).toFixed(2)"></td>
+                        <td class="py-3 px-4" x-text="r.adjustment_secondary_unit || ''"></td>
+
+                        <td class="py-3 px-4" x-text="((r.in_qty_pcs !== undefined ? r.in_qty_pcs : 0) || 0).toFixed(0)"></td>
+                        <td class="py-3 px-4" x-text="r.in_base_unit || ''"></td>
+                        <td class="py-3 px-4" x-text="((r.in_qty_weight !== undefined ? r.in_qty_weight : 0) || 0).toFixed(2)"></td>
+                        <td class="py-3 px-4" x-text="r.in_secondary_unit || ''"></td>
+
+                        <td class="py-3 px-4" x-text="((r.out_qty_pcs !== undefined ? r.out_qty_pcs : 0) || 0).toFixed(0)"></td>
+                        <td class="py-3 px-4" x-text="r.out_base_unit || ''"></td>
+                        <td class="py-3 px-4" x-text="((r.out_qty_weight !== undefined ? r.out_qty_weight : 0) || 0).toFixed(2)"></td>
+                        <td class="py-3 px-4" x-text="r.out_secondary_unit || ''"></td>
+
+                        <td class="py-3 px-4 font-semibold" x-text="((r.balance_qty_pcs !== undefined ? r.balance_qty_pcs : 0) || 0).toFixed(0)"></td>
+                        <td class="py-3 px-4" x-text="r.balance_base_unit || ''"></td>
+                        <td class="py-3 px-4" x-text="((r.balance_qty_weight !== undefined ? r.balance_qty_weight : 0) || 0).toFixed(2)"></td>
+                        <td class="py-3 px-4" x-text="r.balance_secondary_unit || ''"></td>
                       </tr>
                     </template>
                   </tbody>

@@ -575,7 +575,7 @@ SELECT
     (c.init_qty_weight + c.running_net_weight) AS balance_qty_weight,
     c.secondary_unit AS balance_secondary_unit
 FROM calculated_ledger c
-ORDER BY c.item_id, c.trans_date ASC, c.type_priority ASC, c.trans_id ASC;
+ORDER BY c.trans_date ASC, c.type_priority ASC, c.trans_id ASC, c.item_name ASC;
 `;
 
       db.all(sql, params, (errQuery, rows) => {
@@ -721,29 +721,208 @@ ORDER BY c.item_id, c.trans_date ASC, c.type_priority ASC, c.trans_id ASC;
       (c.init_qty_weight + c.running_net_weight) AS balance_qty_weight,
       c.secondary_unit AS balance_secondary_unit
     FROM calculated_ledger c
-    ORDER BY c.item_id, c.trans_date ASC, c.type_priority ASC, c.trans_id ASC;
+    ORDER BY c.trans_date ASC, c.type_priority ASC, c.trans_id ASC, c.item_name ASC;
     `;
 
-      db.all(sql, params, async (qErr, rows) => {
-        if (qErr) return res.status(500).send(qErr.message);
-        try {
-          if (type === 'excel') {
-            const workbook = new ExcelJS.Workbook();
-            const sheet = workbook.addWorksheet('Report');
-            if (rows.length > 0) sheet.addRow(Object.keys(rows[0]));
-            rows.forEach(r => sheet.addRow(Object.values(r)));
-            const buffer = await workbook.xlsx.writeBuffer();
-            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-            res.setHeader('Content-Disposition', 'attachment; filename=stock-report.xlsx');
-            return res.send(Buffer.from(buffer));
-          } else {
-            // generate simple HTML table
-            let html = `<html><head><meta charset="utf-8"><style>table{border-collapse:collapse;width:100%}td,th{border:1px solid #ddd;padding:6px;font-size:12px}</style></head><body><h3>Stock Report</h3><table><thead><tr>`;
-            const keys = rows.length > 0 ? Object.keys(rows[0]) : [];
-            keys.forEach(k => { html += `<th>${k}</th>` });
-            html += `</tr></thead><tbody>`;
-            rows.forEach(r => { html += '<tr>'; keys.forEach(k => { html += `<td>${(r[k] !== null && r[k] !== undefined) ? r[k] : ''}</td>` }); html += '</tr>'; });
-            html += `</tbody></table></body></html>`;
+      db.get('SELECT warehouse_name FROM master_warehouse WHERE id = ?', [warehouse_id], async (whErr, warehouse) => {
+        if (whErr) return res.status(500).send(whErr.message);
+        const warehouseName = warehouse?.warehouse_name || '';
+
+        db.all(sql, params, async (qErr, rows) => {
+          if (qErr) return res.status(500).send(qErr.message);
+          try {
+            const title = 'Report Stock Per Warehouse Group By Item';
+            const rangeText = `From Date: ${from_date}   To Date: ${to_date}`;
+            const warehouseText = `Farm / Warehouse: ${warehouseName}`;
+            const headers = [
+              'No', 'trans_date', 'item_name', 'notes',
+              'saldo_awal_qty_pcs', 'saldo_awal_base_unit', 'saldo_awal_qty_weight', 'saldo_awal_secondary_unit',
+              'adjustment_qty_pcs', 'adjustment_base_unit', 'adjustment_qty_weight', 'adjustment_secondary_unit',
+              'in_qty_pcs', 'in_base_unit', 'in_qty_weight', 'in_secondary_unit',
+              'out_qty_pcs', 'out_base_unit', 'out_qty_weight', 'out_secondary_unit',
+              'balance_qty_pcs', 'balance_base_unit', 'balance_qty_weight', 'balance_secondary_unit'
+            ];
+
+            if (type === 'excel') {
+              const workbook = new ExcelJS.Workbook();
+              const sheet = workbook.addWorksheet('Report');
+              const totalCols = headers.length;
+              const endCol = String.fromCharCode('A'.charCodeAt(0) + totalCols - 1);
+
+              sheet.mergeCells(`A1:${endCol}1`);
+              sheet.mergeCells(`A2:${endCol}2`);
+              sheet.mergeCells(`A3:${endCol}3`);
+              sheet.getCell('A1').value = title;
+              sheet.getCell('A2').value = rangeText;
+              sheet.getCell('A3').value = warehouseText;
+              ['A1', 'A2', 'A3'].forEach((cell) => {
+                sheet.getCell(cell).alignment = { horizontal: 'center', vertical: 'middle' };
+                sheet.getCell(cell).font = { bold: true, size: 12 };
+              });
+
+              const headerRow1 = sheet.getRow(4);
+              const headerRow2 = sheet.getRow(5);
+              headerRow1.height = 20;
+              headerRow2.height = 20;
+
+              const titles = [
+                { label: 'No', span: 1 },
+                { label: 'trans_date', span: 1 },
+                { label: 'item_name', span: 1 },
+                { label: 'notes', span: 1 },
+                { label: 'saldo_awal', span: 4 },
+                { label: 'adjustment', span: 4 },
+                { label: 'in', span: 4 },
+                { label: 'out', span: 4 },
+                { label: 'balance', span: 4 }
+              ];
+              let colIndex = 1;
+              titles.forEach((item) => {
+                const start = sheet.getRow(4).getCell(colIndex);
+                start.value = item.label;
+                start.alignment = { horizontal: 'center', vertical: 'middle' };
+                start.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFB8D5FF' } };
+                start.font = { bold: true };
+                if (item.span > 1) {
+                  const endIndex = colIndex + item.span - 1;
+                  sheet.mergeCells(4, colIndex, 4, endIndex);
+                  for (let c = colIndex; c <= endIndex; c += 1) {
+                    sheet.getCell(4, c).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFB8D5FF' } };
+                    sheet.getCell(4, c).font = { bold: true };
+                  }
+                } else {
+                  sheet.mergeCells(4, colIndex, 5, colIndex);
+                  sheet.getCell(4, colIndex).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFB8D5FF' } };
+                  sheet.getCell(4, colIndex).font = { bold: true };
+                }
+                colIndex += item.span;
+              });
+
+              const subHeaders = ['qty_pcs', 'base_unit', 'qty_weight', 'secondary_unit'];
+              const subCols = ['E', 'F', 'G', 'H'];
+              let subIndex = 5;
+              for (let group = 0; group < 5; group += 1) {
+                subHeaders.forEach((sub) => {
+                  const cell = headerRow2.getCell(subIndex);
+                  cell.value = sub;
+                  cell.alignment = { horizontal: 'center', vertical: 'middle' };
+                  cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE4F1FF' } };
+                  cell.font = { bold: true };
+                  subIndex += 1;
+                });
+              }
+
+              sheet.columns = headers.map((h) => ({ header: h, key: h, width: 14 }));
+              sheet.columns[1].width = 14;
+              sheet.columns[2].width = 18;
+              sheet.columns[3].width = 22;
+              sheet.columns[4].width = 12;
+              sheet.columns[6].width = 12;
+              rows.forEach((row) => {
+                sheet.addRow([
+                  row.no,
+                  row.trans_date,
+                  row.item_name,
+                  row.notes,
+                  row.saldo_awal_qty_pcs,
+                  row.saldo_awal_base_unit,
+                  row.saldo_awal_qty_weight,
+                  row.saldo_awal_secondary_unit,
+                  row.adjustment_qty_pcs,
+                  row.adjustment_base_unit,
+                  row.adjustment_qty_weight,
+                  row.adjustment_secondary_unit,
+                  row.in_qty_pcs,
+                  row.in_base_unit,
+                  row.in_qty_weight,
+                  row.in_secondary_unit,
+                  row.out_qty_pcs,
+                  row.out_base_unit,
+                  row.out_qty_weight,
+                  row.out_secondary_unit,
+                  row.balance_qty_pcs,
+                  row.balance_base_unit,
+                  row.balance_qty_weight,
+                  row.balance_secondary_unit
+                ]);
+              });
+
+              const buffer = await workbook.xlsx.writeBuffer();
+              res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+              res.setHeader('Content-Disposition', 'attachment; filename=stock-report.xlsx');
+              return res.send(Buffer.from(buffer));
+            }
+
+            const html = `
+              <html>
+                <head>
+                  <meta charset="utf-8">
+                  <style>
+                    body { font-family: Arial, sans-serif; font-size: 11px; }
+                    table { border-collapse: collapse; width: 100%; }
+                    th, td { border: 1px solid #999; padding: 6px; }
+                    .title-row td { background: #d8e8ff; font-weight: bold; text-align: center; font-size: 14px; }
+                    .info-row td { background: #f3f6ff; font-weight: bold; }
+                    .group-header { background: #b8d5ff; text-align: center; font-weight: bold; }
+                    .sub-header { background: #e4f1ff; text-align: center; font-weight: bold; }
+                  </style>
+                </head>
+                <body>
+                  <table>
+                    <tr class="title-row"><td colspan="24">${title}</td></tr>
+                    <tr class="info-row"><td colspan="24">${rangeText}</td></tr>
+                    <tr class="info-row"><td colspan="24">${warehouseText}</td></tr>
+                    <tr class="group-header">
+                      <td rowspan="2">No</td>
+                      <td rowspan="2">trans_date</td>
+                      <td rowspan="2">item_name</td>
+                      <td rowspan="2">notes</td>
+                      <td colspan="4">saldo_awal</td>
+                      <td colspan="4">adjustment</td>
+                      <td colspan="4">in</td>
+                      <td colspan="4">out</td>
+                      <td colspan="4">balance</td>
+                    </tr>
+                    <tr class="sub-header">
+                      <td>qty_pcs</td><td>base_unit</td><td>qty_weight</td><td>secondary_unit</td>
+                      <td>qty_pcs</td><td>base_unit</td><td>qty_weight</td><td>secondary_unit</td>
+                      <td>qty_pcs</td><td>base_unit</td><td>qty_weight</td><td>secondary_unit</td>
+                      <td>qty_pcs</td><td>base_unit</td><td>qty_weight</td><td>secondary_unit</td>
+                      <td>qty_pcs</td><td>base_unit</td><td>qty_weight</td><td>secondary_unit</td>
+                    </tr>
+                    ${rows.map((row) => `
+                      <tr>
+                        <td>${row.no}</td>
+                        <td>${row.trans_date}</td>
+                        <td>${row.item_name}</td>
+                        <td>${row.notes || ''}</td>
+                        <td>${row.saldo_awal_qty_pcs}</td>
+                        <td>${row.saldo_awal_base_unit}</td>
+                        <td>${row.saldo_awal_qty_weight}</td>
+                        <td>${row.saldo_awal_secondary_unit}</td>
+                        <td>${row.adjustment_qty_pcs}</td>
+                        <td>${row.adjustment_base_unit}</td>
+                        <td>${row.adjustment_qty_weight}</td>
+                        <td>${row.adjustment_secondary_unit}</td>
+                        <td>${row.in_qty_pcs}</td>
+                        <td>${row.in_base_unit}</td>
+                        <td>${row.in_qty_weight}</td>
+                        <td>${row.in_secondary_unit}</td>
+                        <td>${row.out_qty_pcs}</td>
+                        <td>${row.out_base_unit}</td>
+                        <td>${row.out_qty_weight}</td>
+                        <td>${row.out_secondary_unit}</td>
+                        <td>${row.balance_qty_pcs}</td>
+                        <td>${row.balance_base_unit}</td>
+                        <td>${row.balance_qty_weight}</td>
+                        <td>${row.balance_secondary_unit}</td>
+                      </tr>
+                    `).join('')}
+                  </table>
+                </body>
+              </html>
+            `;
+
             const browser = await puppeteer.launch({ args: ['--no-sandbox','--disable-setuid-sandbox'] });
             const page = await browser.newPage();
             await page.setContent(html, { waitUntil: 'networkidle0' });
@@ -752,10 +931,10 @@ ORDER BY c.item_id, c.trans_date ASC, c.type_priority ASC, c.trans_id ASC;
             res.setHeader('Content-Type', 'application/pdf');
             res.setHeader('Content-Disposition', 'attachment; filename=stock-report.pdf');
             return res.send(pdfBuffer);
+          } catch (e) {
+            return res.status(500).send(e.message);
           }
-        } catch (e) {
-          return res.status(500).send(e.message);
-        }
+        });
       });
     });
   });
