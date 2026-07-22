@@ -177,17 +177,31 @@
             </div>
               <div class="bg-white rounded-xl border border-softr-border overflow-hidden">
                 <table class="w-full text-left border-collapse">
-                  <thead class="bg-slate-50 border-b text-[11px] font-semibold text-slate-500 uppercase"><tr><th class="py-3 px-4">Warehouse</th><th class="py-3 px-4">Item</th><th class="py-3 px-4">Saldo Awal</th><th class="py-3 px-4">Adj</th><th class="py-3 px-4">Masuk</th><th class="py-3 px-4">Keluar</th><th class="py-3 px-4">Saldo Akhir</th></tr></thead>
+                  <thead class="bg-slate-50 border-b text-[11px] font-semibold text-slate-500 uppercase">
+                    <tr>
+                      <th class="py-3 px-4">No</th>
+                      <th class="py-3 px-4">Tanggal</th>
+                      <th class="py-3 px-4">Item</th>
+                      <th class="py-3 px-4">Notes</th>
+                      <th class="py-3 px-4">Saldo Awal</th>
+                      <th class="py-3 px-4">Adjustment</th>
+                      <th class="py-3 px-4">Masuk</th>
+                      <th class="py-3 px-4">Keluar</th>
+                      <th class="py-3 px-4">Saldo Akhir</th>
+                    </tr>
+                  </thead>
                   <tbody class="divide-y text-xs">
-                    <template x-for="r in pagedReport()" :key="r.warehouse_id + '-' + r.item_id">
+                    <template x-for="r in pagedReport()" :key="(r.no || '') + '-' + (r.item_name || '') + '-' + (r.trans_date || '')">
                       <tr>
-                        <td class="py-3 px-4" x-text="r.warehouse_name"></td>
-                        <td class="py-3 px-4" x-text="r.item_name"></td>
-                        <td class="py-3 px-4" x-text="(r.opening_pcs || 0).toFixed(0)"></td>
-                        <td class="py-3 px-4" x-text="(r.adjustment_pcs || 0).toFixed(0)"></td>
-                        <td class="py-3 px-4" x-text="(r.in_pcs || 0).toFixed(0)"></td>
-                        <td class="py-3 px-4" x-text="(r.out_pcs || 0).toFixed(0)"></td>
-                        <td class="py-3 px-4 font-semibold" x-text="(r.closing_pcs || 0).toFixed(0)"></td>
+                        <td class="py-3 px-4" x-text="r.no || ''"></td>
+                        <td class="py-3 px-4" x-text="r.trans_date || ''"></td>
+                        <td class="py-3 px-4" x-text="r.item_name || ''"></td>
+                        <td class="py-3 px-4" x-text="r.notes || ''"></td>
+                        <td class="py-3 px-4" x-text="((r.saldo_awal_qty_pcs !== undefined ? r.saldo_awal_qty_pcs : r.saldo_awal || 0) || 0).toFixed(0)"></td>
+                        <td class="py-3 px-4" x-text="((r.adjustment_qty_pcs !== undefined ? r.adjustment_qty_pcs : r.adjustment_pcs || 0) || 0).toFixed(0)"></td>
+                        <td class="py-3 px-4" x-text="((r.in_qty_pcs !== undefined ? r.in_qty_pcs : r.in_pcs || 0) || 0).toFixed(0)"></td>
+                        <td class="py-3 px-4" x-text="((r.out_qty_pcs !== undefined ? r.out_qty_pcs : r.out_pcs || 0) || 0).toFixed(0)"></td>
+                        <td class="py-3 px-4 font-semibold" x-text="((r.balance_qty_pcs !== undefined ? r.balance_qty_pcs : r.closing_pcs || 0) || 0).toFixed(0)"></td>
                       </tr>
                     </template>
                   </tbody>

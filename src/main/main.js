@@ -596,31 +596,133 @@ ORDER BY c.item_id, c.trans_date ASC, c.type_priority ASC, c.trans_id ASC;
       if (!isSuperadmin(role) && accessParams && accessParams.length > 0 && !accessParams.includes(Number(warehouse_id))) {
         return res.status(403).send('Forbidden');
       }
-      // build same sql as above (omitting here for brevity by calling the route handler logic)
-      // For simplicity, call the report endpoint logic by building the SQL again
-      let sql = `
-WITH params AS (SELECT ? AS from_date, ? AS to_date, ? AS warehouse_id),
-raw_transactions AS (
-    SELECT h.id AS trans_id, h.trans_date, d.item_id, mi.item_name, mi.base_unit, mi.secondary_unit, d.notes, h.trans_type,
-    CASE WHEN h.trans_type = 'ADJUSTMENT' THEN 1 WHEN h.trans_type = 'IN' THEN 2 WHEN h.trans_type = 'OUT' THEN 3 ELSE 4 END AS type_priority,
-    CASE WHEN h.trans_type = 'ADJUSTMENT' THEN d.qty_pcs ELSE 0 END AS adj_qty_pcs,
-    CASE WHEN h.trans_type = 'IN' THEN d.qty_pcs ELSE 0 END AS in_qty_pcs,
-    CASE WHEN h.trans_type = 'OUT' THEN d.qty_pcs ELSE 0 END AS out_qty_pcs,
-    CASE WHEN h.trans_type = 'ADJUSTMENT' THEN d.qty_weight ELSE 0 END AS adj_qty_weight,
-    CASE WHEN h.trans_type = 'IN' THEN d.qty_weight ELSE 0 END AS in_qty_weight,
-    CASE WHEN h.trans_type = 'OUT' THEN d.qty_weight ELSE 0 END AS out_qty_weight,
-    CASE WHEN h.trans_type IN ('ADJUSTMENT','IN') THEN d.qty_pcs WHEN h.trans_type='OUT' THEN -d.qty_pcs ELSE 0 END AS net_pcs,
-    CASE WHEN h.trans_type IN ('ADJUSTMENT','IN') THEN d.qty_weight WHEN h.trans_type='OUT' THEN -d.qty_weight ELSE 0 END AS net_weight
-    FROM transaction_header h JOIN transaction_detail d ON h.id = d.header_id JOIN master_item mi ON d.item_id = mi.id
-    WHERE h.trans_date BETWEEN (SELECT from_date FROM params) AND (SELECT to_date FROM params)
-      AND h.warehouse_id = (SELECT warehouse_id FROM params) AND h.status IN ('Posted','Active')
-`;
-      const params = [from_date, to_date, Number(warehouse_id)];
-      if (selectedItemIds.length > 0) {
+        // build full ledger SQL (same as list endpoint) so export matches displayed report
+        let sql = `
+    WITH params AS (
+      SELECT ? AS from_date, ? AS to_date, ? AS warehouse_id
+    ),
+
+    opening_balance AS (
+      SELECT 
+        d.item_id,
+        COALESCE(SUM(CASE 
+          WHEN h.trans_type IN ('ADJUSTMENT', 'IN') THEN d.qty_pcs 
+          WHEN h.trans_type = 'OUT' THEN -d.qty_pcs 
+          ELSE 0 
+        END), 0) AS init_qty_pcs,
+        COALESCE(SUM(CASE 
+          WHEN h.trans_type IN ('ADJUSTMENT', 'IN') THEN d.qty_weight 
+          WHEN h.trans_type = 'OUT' THEN -d.qty_weight 
+          ELSE 0 
+        END), 0) AS init_qty_weight
+      FROM transaction_header h
+      JOIN transaction_detail d ON h.id = d.header_id
+      CROSS JOIN params p
+      WHERE h.trans_date < (SELECT from_date FROM params)
+        AND h.warehouse_id = (SELECT warehouse_id FROM params)
+        AND h.status IN ('Posted', 'Active')
+      GROUP BY d.item_id
+    ),
+
+    raw_transactions AS (
+      SELECT 
+        h.id AS trans_id,
+        h.trans_date,
+        d.item_id,
+        mi.item_name,
+        mi.base_unit,
+        mi.secondary_unit,
+        d.notes,
+        h.trans_type,
+        CASE 
+          WHEN h.trans_type = 'ADJUSTMENT' THEN 1
+          WHEN h.trans_type = 'IN' THEN 2
+          WHEN h.trans_type = 'OUT' THEN 3
+          ELSE 4
+        END AS type_priority,
+        CASE WHEN h.trans_type = 'ADJUSTMENT' THEN d.qty_pcs ELSE 0 END AS adj_qty_pcs,
+        CASE WHEN h.trans_type = 'IN'         THEN d.qty_pcs ELSE 0 END AS in_qty_pcs,
+        CASE WHEN h.trans_type = 'OUT'        THEN d.qty_pcs ELSE 0 END AS out_qty_pcs,
+        CASE WHEN h.trans_type = 'ADJUSTMENT' THEN d.qty_weight ELSE 0 END AS adj_qty_weight,
+        CASE WHEN h.trans_type = 'IN'         THEN d.qty_weight ELSE 0 END AS in_qty_weight,
+        CASE WHEN h.trans_type = 'OUT'        THEN d.qty_weight ELSE 0 END AS out_qty_weight,
+        CASE 
+          WHEN h.trans_type IN ('ADJUSTMENT', 'IN') THEN d.qty_pcs 
+          WHEN h.trans_type = 'OUT' THEN -d.qty_pcs 
+          ELSE 0 
+        END AS net_pcs,
+        CASE 
+          WHEN h.trans_type IN ('ADJUSTMENT', 'IN') THEN d.qty_weight 
+          WHEN h.trans_type = 'OUT' THEN -d.qty_weight 
+          ELSE 0 
+        END AS net_weight
+      FROM transaction_header h
+      JOIN transaction_detail d ON h.id = d.header_id
+      JOIN master_item mi ON d.item_id = mi.id
+      CROSS JOIN params p
+      WHERE h.trans_date BETWEEN (SELECT from_date FROM params) AND (SELECT to_date FROM params)
+        AND h.warehouse_id = (SELECT warehouse_id FROM params)
+        AND h.status IN ('Posted', 'Active')
+    `;
+
+        const params = [from_date, to_date, Number(warehouse_id)];
+        if (selectedItemIds.length > 0) {
         sql += ` AND d.item_id IN (${selectedItemIds.map(() => '?').join(',')})`;
         selectedItemIds.forEach(id => params.push(Number(id)));
-      }
-      sql += `) SELECT * FROM raw_transactions ORDER BY trans_date`;
+        }
+
+        sql += `
+    ),
+
+    calculated_ledger AS (
+      SELECT 
+        t.*,
+        COALESCE(ob.init_qty_pcs, 0) AS init_qty_pcs,
+        COALESCE(ob.init_qty_weight, 0) AS init_qty_weight,
+        ROW_NUMBER() OVER (
+          PARTITION BY t.item_id 
+          ORDER BY t.trans_date ASC, t.type_priority ASC, t.trans_id ASC
+        ) AS row_num,
+        SUM(t.net_pcs) OVER (
+          PARTITION BY t.item_id 
+          ORDER BY t.trans_date ASC, t.type_priority ASC, t.trans_id ASC
+        ) AS running_net_pcs,
+        SUM(t.net_weight) OVER (
+          PARTITION BY t.item_id 
+          ORDER BY t.trans_date ASC, t.type_priority ASC, t.trans_id ASC
+        ) AS running_net_weight
+      FROM raw_transactions t
+      LEFT JOIN opening_balance ob ON t.item_id = ob.item_id
+    )
+
+    SELECT 
+      c.row_num AS no,
+      c.trans_date,
+      c.item_name,
+      c.notes,
+      (c.init_qty_pcs + c.running_net_pcs - c.net_pcs) AS saldo_awal_qty_pcs,
+      c.base_unit AS saldo_awal_base_unit,
+      (c.init_qty_weight + c.running_net_weight - c.net_weight) AS saldo_awal_qty_weight,
+      c.secondary_unit AS saldo_awal_secondary_unit,
+      c.adj_qty_pcs AS adjustment_qty_pcs,
+      c.base_unit AS adjustment_base_unit,
+      c.adj_qty_weight AS adjustment_qty_weight,
+      c.secondary_unit AS adjustment_secondary_unit,
+      c.in_qty_pcs AS in_qty_pcs,
+      c.base_unit AS in_base_unit,
+      c.in_qty_weight AS in_qty_weight,
+      c.secondary_unit AS in_secondary_unit,
+      c.out_qty_pcs AS out_qty_pcs,
+      c.base_unit AS out_base_unit,
+      c.out_qty_weight AS out_qty_weight,
+      c.secondary_unit AS out_secondary_unit,
+      (c.init_qty_pcs + c.running_net_pcs) AS balance_qty_pcs,
+      c.base_unit AS balance_base_unit,
+      (c.init_qty_weight + c.running_net_weight) AS balance_qty_weight,
+      c.secondary_unit AS balance_secondary_unit
+    FROM calculated_ledger c
+    ORDER BY c.item_id, c.trans_date ASC, c.type_priority ASC, c.trans_id ASC;
+    `;
 
       db.all(sql, params, async (qErr, rows) => {
         if (qErr) return res.status(500).send(qErr.message);
