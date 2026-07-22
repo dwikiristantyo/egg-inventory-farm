@@ -534,8 +534,7 @@ calculated_ledger AS (
         COALESCE(ob.init_qty_pcs, 0) AS init_qty_pcs,
         COALESCE(ob.init_qty_weight, 0) AS init_qty_weight,
         ROW_NUMBER() OVER (
-            PARTITION BY t.item_id 
-            ORDER BY t.trans_date ASC, t.type_priority ASC, t.trans_id ASC
+            ORDER BY t.item_id ASC, t.trans_date ASC, t.type_priority ASC, t.trans_id ASC
         ) AS row_num,
         SUM(t.net_pcs) OVER (
             PARTITION BY t.item_id 
@@ -575,7 +574,7 @@ SELECT
     (c.init_qty_weight + c.running_net_weight) AS balance_qty_weight,
     c.secondary_unit AS balance_secondary_unit
 FROM calculated_ledger c
-ORDER BY c.trans_date ASC, c.type_priority ASC, c.trans_id ASC, c.item_name ASC;
+ORDER BY c.item_id ASC, c.trans_date ASC, c.type_priority ASC, c.trans_id ASC;
 `;
 
       db.all(sql, params, (errQuery, rows) => {
@@ -680,8 +679,7 @@ ORDER BY c.trans_date ASC, c.type_priority ASC, c.trans_id ASC, c.item_name ASC;
         COALESCE(ob.init_qty_pcs, 0) AS init_qty_pcs,
         COALESCE(ob.init_qty_weight, 0) AS init_qty_weight,
         ROW_NUMBER() OVER (
-          PARTITION BY t.item_id 
-          ORDER BY t.trans_date ASC, t.type_priority ASC, t.trans_id ASC
+          ORDER BY t.item_id ASC, t.trans_date ASC, t.type_priority ASC, t.trans_id ASC
         ) AS row_num,
         SUM(t.net_pcs) OVER (
           PARTITION BY t.item_id 
@@ -721,7 +719,7 @@ ORDER BY c.trans_date ASC, c.type_priority ASC, c.trans_id ASC, c.item_name ASC;
       (c.init_qty_weight + c.running_net_weight) AS balance_qty_weight,
       c.secondary_unit AS balance_secondary_unit
     FROM calculated_ledger c
-    ORDER BY c.trans_date ASC, c.type_priority ASC, c.trans_id ASC, c.item_name ASC;
+    ORDER BY c.item_id ASC, c.trans_date ASC, c.type_priority ASC, c.trans_id ASC;
     `;
 
       db.get('SELECT warehouse_name FROM master_warehouse WHERE id = ?', [warehouse_id], async (whErr, warehouse) => {
