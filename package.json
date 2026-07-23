@@ -2,24 +2,32 @@
   "name": "egg-inventory-farm",
   "version": "1.0.0",
   "description": "Aplikasi Inventory Stock Telur Farm Offline",
-  "main": "src/main/index.js",
+  "main": "run_server.js",
   "scripts": {
-    "start": "electron .",
-    "pack": "electron-builder --dir",
+    "start": "node run_server.js",
+    "dev": "node run_server.js",
     "dist": "electron-builder"
   },
-  "keywords": [],
+  "keywords": [
+    "inventory",
+    "egg-farm",
+    "sqlite",
+    "express"
+  ],
   "author": "",
   "license": "ISC",
-  "devDependencies": {
-    "electron": "^30.0.0",
-    "electron-builder": "^24.13.3"
-  },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "exceljs": "^4.4.0",
     "express": "^4.19.2",
     "puppeteer": "^22.10.0",
-    "sqlite3": "^6.0.1"
+    "sql.js": "^1.14.1",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "electron": "^28.2.0",
+    "electron-builder": "^24.13.3",
+    "into-stream": "^6.0.0",
+    "pkg": "^5.8.1"
   }
 }
